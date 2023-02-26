@@ -37,8 +37,12 @@ Once you have entered your API key, you will be taken to the main menu. From the
 
 ## Contributing
 
-We welcome contributions to WaniKani CLI Tool! If you find a bug or have an idea for a new feature, please open an issue on the repository. If you would like to contribute code, please fork the repository and submit a pull request.
+We welcome contributions to WaniKani CLI Tool! If you find a bug or have an idea for a new feature, please open an issue on the repository. 
+If you would like to contribute code, please fork the repository and submit a pull request.
+
+[Contributing Guide](https://github.com/randolftjandra/wk/blob/main/CONTRIBUTING.md)
 
 ## License
 
 WaniKani CLI Tool is released under the MIT License. See [LICENSE](https://github.com/randolftjandra/wk/blob/main/LICENSE) for more information.
+
