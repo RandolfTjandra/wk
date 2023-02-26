@@ -8,11 +8,11 @@ build-wk:
 	go build -o $(DIST_DIR)/wk/bootstrap \
 			 ./wk/main.go \
 			 ./wk/model.go \
-			 ./wk/command.go
+			 ./wk/command.go \
+			 ./wk/views.go
 
 package-wk: build-wk
 	cd $(DIST_DIR)/wk && zip wk.zip ./bootstrap 
-
 
 package-all: \
 package-wk
