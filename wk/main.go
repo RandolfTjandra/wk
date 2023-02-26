@@ -10,7 +10,7 @@ import (
 func main() {
 	p := tea.NewProgram(initialModel(IndexView))
 	if err := p.Start(); err != nil {
-		fmt.Printf("Alas, there's been an error: %v", err)
+		fmt.Printf("Error starting: %v", err)
 		os.Exit(1)
 	}
 }
