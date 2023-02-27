@@ -8,16 +8,20 @@ import (
 type model struct {
 	navChoices  []PageView
 	currentPage PageView
-	cursor      int
+	cursors     map[PageView]int
 	response    []byte
 	err         error
 
-	Summary *wanikaniapi.Summary
-	User    *wanikaniapi.User
+	User *wanikaniapi.User
+
+	Summary          *wanikaniapi.Summary
+	SummaryLessons   []*wanikaniapi.SummaryLesson
+	SummaryReviews   []*wanikaniapi.SummaryReview
+	SummaryExpansion map[int]bool
 }
 
 func (m model) Init() tea.Cmd {
-	return getUser
+	return tea.Batch(getUser, tea.EnterAltScreen)
 }
 
 func initialModel(view PageView) model {
@@ -30,7 +34,11 @@ func initialModel(view PageView) model {
 			ReviewsView,
 			SettingsView,
 		},
-		cursor: 0,
+		cursors: map[PageView]int{
+			IndexView:   0,
+			SummaryView: 0,
+		},
+		SummaryExpansion: make(map[int]bool),
 	}
 }
 
@@ -41,6 +49,23 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 	case *wanikaniapi.Summary:
 		m.Summary = msg
+		i := 0
+		// prep summary lessons
+		for _, lesson := range m.Summary.Data.Lessons {
+			if len(lesson.SubjectIDs) == 0 {
+				continue
+			}
+			m.SummaryLessons = append(m.SummaryLessons, lesson)
+			i++
+		}
+		// prep summary reviews
+		for _, review := range m.Summary.Data.Reviews {
+			if len(review.SubjectIDs) == 0 {
+				continue
+			}
+			m.SummaryReviews = append(m.SummaryReviews, review)
+			i++
+		}
 		return m, nil
 	case errMsg:
 		m.err = msg
@@ -61,18 +86,30 @@ func (m model) handleKeyPress(key tea.KeyMsg) (tea.Model, tea.Cmd) {
 	case "q":
 		return m, tea.Quit
 	case "up", "k":
-		if m.cursor > 0 {
-			m.cursor--
+		if m.cursors[m.currentPage] > 0 {
+			m.cursors[m.currentPage]--
 		}
 	case "down", "j":
-		if m.cursor < len(m.navChoices)-1 {
-			m.cursor++
+		switch m.currentPage {
+		case IndexView:
+			if m.cursors[m.currentPage] < len(m.navChoices)-1 {
+				m.cursors[m.currentPage]++
+			}
+		case SummaryView:
+			if m.cursors[m.currentPage] < len(m.SummaryReviews)+len(m.SummaryLessons)-1 {
+				m.cursors[m.currentPage]++
+			}
 		}
 	case "enter":
-		m.currentPage = m.navChoices[m.cursor]
 		switch m.currentPage {
+		case IndexView:
+			m.currentPage = m.navChoices[m.cursors[IndexView]]
+			switch m.currentPage {
+			case SummaryView:
+				return m, getSummary
+			}
 		case SummaryView:
-			return m, getSummary
+			m.SummaryExpansion[m.cursors[SummaryView]] = !m.SummaryExpansion[m.cursors[SummaryView]]
 		}
 	}
 	return m, nil

@@ -6,16 +6,10 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/charmbracelet/lipgloss"
 	colorful "github.com/lucasb-eyer/go-colorful"
 	"github.com/muesli/termenv"
 )
-
-// styling
-// var (
-// term          = termenv.EnvColorProfile()
-// progressEmpty = subtle(progressEmptyChar)
-// Gradient colors we'll use for the progress bar
-// )
 
 const (
 	progressBarWidth  = 71
@@ -23,6 +17,7 @@ const (
 	progressEmptyChar = "░"
 )
 
+// styling
 var (
 	term = termenv.EnvColorProfile()
 
@@ -31,11 +26,25 @@ var (
 	Dot           = colorFg(" • ", "236")
 	progressEmpty = Subtle(progressEmptyChar)
 
+	Radical = makeFgBgStyle("#E5E5E5", "#00AAFF")
+	Kanji   = makeFgBgStyle("#E5E5E5", "#FF00AA")
+	Vocab   = makeFgBgStyle("#E5E5E5", "#9400FF")
+
 	ramp = makeRamp("#B14FFF", "#00FFA3", progressBarWidth)
+
+	H1Title = lipgloss.NewStyle().
+		Width(80).
+		Align(lipgloss.Center).
+		BorderStyle(lipgloss.RoundedBorder()).
+		BorderForeground(lipgloss.Color("63"))
 )
 
 func makeFgStyle(color string) func(string) string {
 	return termenv.Style{}.Foreground(term.Color(color)).Styled
+}
+
+func makeFgBgStyle(fgColor string, bgColor string) func(string) string {
+	return termenv.Style{}.Foreground(term.Color(fgColor)).Background(term.Color(bgColor)).Styled
 }
 
 // Color a string's foreground with the given value.
@@ -69,8 +78,9 @@ func makeRamp(colorA, colorB string, steps float64) (s []string) {
 	return
 }
 
-func Progressbar(width int, percent float64) string {
+func Progressbar(width int, numerator float64, denominator float64) string {
 	w := float64(progressBarWidth)
+	percent := numerator / denominator
 
 	fullSize := int(math.Round(w * percent))
 	var fullCells string
@@ -81,5 +91,5 @@ func Progressbar(width int, percent float64) string {
 	emptySize := int(w) - fullSize
 	emptyCells := strings.Repeat(progressEmpty, emptySize)
 
-	return fmt.Sprintf("%s%s %3.0f", fullCells, emptyCells, math.Round(percent*100))
+	return fmt.Sprintf("%s%s %.0f/%.0f", fullCells, emptyCells, numerator, denominator)
 }
