@@ -4,9 +4,11 @@ WaniKani CLI Tool is a command line interface (CLI) tool designed to connect to 
 
 With WaniKani CLI Tool, you can quickly and easily check your current level, review statistics, and progress charts. It's perfect for those who want to keep track of their WaniKani learning journey without having to navigate through the WaniKani website.
 
+https://user-images.githubusercontent.com/1756067/222019921-e045ea25-3c1c-4d97-a2be-842df314e9ce.mp4
+
 ## Features
 
-- Interactive and user-friendly TUI interface
+- Interactive and user-friendly TUI
 - Display of current level, review statistics, and progress charts
 - Quick and easy access to personal learning statistics
 - Secure and reliable connection to the WaniKani API
@@ -33,7 +35,9 @@ Once you have built the binary, you can run the tool using the following command
 
 When you run WaniKani CLI Tool, you will be prompted to enter your API key. You can find your API key on the WaniKani website by going to the API Tokens section of your account settings.
 
-Once you have entered your API key, you will be taken to the main menu. From there, you can navigate through the various options using the arrow keys and enter key. 
+(Right now you have to enter your API key into pkg/wanikani/config.go manually)
+
+Once you have entered your API key, make and run the application. From there, you can navigate through the various options using the arrow keys and enter key. 
 
 ## Contributing
 
