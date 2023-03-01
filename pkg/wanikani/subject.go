@@ -3,7 +3,7 @@ package wanikani
 import (
 	"context"
 	"encoding/json"
-	"log"
+	"errors"
 	"strconv"
 
 	"github.com/brandur/wanikaniapi"
@@ -22,15 +22,22 @@ func GetSubject(ctx context.Context, subjectID wanikaniapi.WKID) (*wanikaniapi.S
 		wkClient := wanikaniapi.NewClient(&wanikaniapi.ClientConfig{
 			APIToken: ApiKey,
 		})
-		log.Println("get subject from api: " + strconv.Itoa(int(subjectID)))
+		//log.Println("get subject from api: " + strconv.Itoa(int(subjectID)))
 
 		res, err := wkClient.SubjectGet(&wanikaniapi.SubjectGetParams{ID: &subjectID})
+		if err != nil {
+			return &wanikaniapi.Subject{}, err
+		}
 		marshalled, _ := json.Marshal(res)
 		rdb.Set(ctx, strconv.Itoa(int(subjectID)), marshalled, 0)
 		return res, err
 	}
 	subject := wanikaniapi.Subject{}
 	json.Unmarshal([]byte(val), &subject)
+	if subject.ID == 0 {
+		rdb.Del(ctx, strconv.Itoa(int(subjectID)))
+		return &subject, errors.New("mistaken value")
+	}
 
 	return &subject, nil
 }
