@@ -3,6 +3,8 @@ package main
 import (
 	"github.com/brandur/wanikaniapi"
 	tea "github.com/charmbracelet/bubbletea"
+
+	"wk/pkg/db"
 )
 
 type model struct {
@@ -11,6 +13,7 @@ type model struct {
 	cursors     map[PageView]int
 	response    []byte
 	err         error
+	subjectRepo db.SubjectRepo
 
 	User *wanikaniapi.User
 
@@ -24,8 +27,9 @@ func (m model) Init() tea.Cmd {
 	return tea.Batch(getUser, tea.EnterAltScreen)
 }
 
-func initialModel(view PageView) model {
+func initialModel(view PageView, subjectRepo db.SubjectRepo) model {
 	return model{
+		subjectRepo: subjectRepo,
 		currentPage: view,
 		navChoices: []PageView{
 			SummaryView,
@@ -33,6 +37,7 @@ func initialModel(view PageView) model {
 			AssignmentsView,
 			ReviewsView,
 			SettingsView,
+			DebuggingView,
 		},
 		cursors: map[PageView]int{
 			IndexView:   0,
