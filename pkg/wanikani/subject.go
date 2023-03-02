@@ -3,41 +3,31 @@ package wanikani
 import (
 	"context"
 	"encoding/json"
-	"errors"
-	"strconv"
 
 	"github.com/brandur/wanikaniapi"
-	redis "github.com/redis/go-redis/v9"
+	_ "github.com/mattn/go-sqlite3"
+
+	"wk/pkg/db"
 )
 
 // Return a single subject cached
-func GetSubject(ctx context.Context, subjectID wanikaniapi.WKID) (*wanikaniapi.Subject, error) {
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     RedisAddr,
-		Password: "", // no password set
-		DB:       0,  // use default DB
-	})
-	val, err := rdb.Get(ctx, strconv.Itoa(int(subjectID))).Result()
+func GetSubject(ctx context.Context, subjectRepo db.SubjectRepo, subjectID wanikaniapi.WKID) (*wanikaniapi.Subject, error) {
+	subjectRaw, err := subjectRepo.GetByID(ctx, int(subjectID))
 	if err != nil { // get from api
 		wkClient := wanikaniapi.NewClient(&wanikaniapi.ClientConfig{
 			APIToken: ApiKey,
 		})
-		//log.Println("get subject from api: " + strconv.Itoa(int(subjectID)))
 
 		res, err := wkClient.SubjectGet(&wanikaniapi.SubjectGetParams{ID: &subjectID})
 		if err != nil {
 			return &wanikaniapi.Subject{}, err
 		}
 		marshalled, _ := json.Marshal(res)
-		rdb.Set(ctx, strconv.Itoa(int(subjectID)), marshalled, 0)
+		subjectRepo.Insert(int(subjectID), string(marshalled))
 		return res, err
 	}
 	subject := wanikaniapi.Subject{}
-	json.Unmarshal([]byte(val), &subject)
-	if subject.ID == 0 {
-		rdb.Del(ctx, strconv.Itoa(int(subjectID)))
-		return &subject, errors.New("mistaken value")
-	}
+	json.Unmarshal([]byte(subjectRaw), &subject)
 
 	return &subject, nil
 }

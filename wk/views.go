@@ -24,6 +24,7 @@ const (
 	LessonsView     PageView = "lessons"
 	ReviewsView     PageView = "reviews"
 	SettingsView    PageView = "settings"
+	DebuggingView   PageView = "debugging"
 )
 
 func (m model) View() string {
@@ -33,11 +34,11 @@ func (m model) View() string {
 	var b strings.Builder
 	switch m.currentPage {
 	case IndexView:
-		b.WriteString(indexView(m))
+		b.WriteString(m.indexView())
 	case SummaryView:
-		b.WriteString(summaryView(m))
+		b.WriteString(m.summaryView())
 	case LessonsView:
-		b.WriteString(lessonsView(m))
+		b.WriteString(m.lessonsView())
 	default:
 		b.WriteString("incomplete: work in progress\n")
 	}
@@ -50,7 +51,7 @@ func (m model) View() string {
 }
 
 // Render index view
-func indexView(m model) string {
+func (m model) indexView() string {
 	var b strings.Builder
 	b.WriteString(ui.H1Title.Render("Wk"))
 	b.WriteString("\n\n")
@@ -72,7 +73,7 @@ func indexView(m model) string {
 }
 
 // Render assignments view
-func assignmentsView(m model) string {
+func (m model) assignmentsView() string {
 	if len(m.response) == 0 {
 		return fmt.Sprintf("loading...")
 	}
@@ -80,7 +81,7 @@ func assignmentsView(m model) string {
 }
 
 // Render summary view
-func summaryView(m model) string {
+func (m model) summaryView() string {
 	if m.Summary == nil {
 		return "loading..."
 	}
@@ -102,7 +103,7 @@ func summaryView(m model) string {
 			lesson.AvailableAt.Local().Format(time.TimeOnly),
 		))
 		if m.SummaryExpansion[i] {
-			b.WriteString("\n  " + renderSubjects(lesson.SubjectIDs))
+			b.WriteString("\n  " + m.renderSubjects(lesson.SubjectIDs))
 		}
 	}
 	b.WriteString("\n\n")
@@ -122,7 +123,7 @@ func summaryView(m model) string {
 			review.AvailableAt.Local().Format(time.TimeOnly),
 		))
 		if m.SummaryExpansion[i+len(m.SummaryLessons)] {
-			b.WriteString("\n  " + renderSubjects(review.SubjectIDs))
+			b.WriteString("\n  " + m.renderSubjects(review.SubjectIDs))
 		}
 	}
 
@@ -130,7 +131,7 @@ func summaryView(m model) string {
 }
 
 // Render lessons view
-func lessonsView(m model) string {
+func (m model) lessonsView() string {
 	if m.Summary == nil {
 		return "loading..."
 	}
@@ -141,7 +142,7 @@ func lessonsView(m model) string {
 		b.WriteString(fmt.Sprintf("  Available at %s\n\n", lesson.AvailableAt.Format(time.RFC1123)))
 		b.WriteString(fmt.Sprintf("    %d subjects:\n\n", len(lesson.SubjectIDs)))
 		for i, subjectID := range lesson.SubjectIDs {
-			subject, err := wanikani.GetSubject(context.Background(), subjectID)
+			subject, err := wanikani.GetSubject(context.Background(), m.subjectRepo, subjectID)
 			if err != nil {
 				b.WriteString("\n  skipped " + string(subject.GetObject().ObjectType) + "due to error: " + err.Error() + "\n")
 			} else if subject.KanjiData != nil {
@@ -160,7 +161,7 @@ func lessonsView(m model) string {
 }
 
 // gets and renders a list of subjects
-func renderSubjects(subjectIDs []wanikaniapi.WKID) string {
+func (m model) renderSubjects(subjectIDs []wanikaniapi.WKID) string {
 	var b strings.Builder
 	subjectCount := 0
 	for _, subjectID := range subjectIDs {
@@ -168,9 +169,9 @@ func renderSubjects(subjectIDs []wanikaniapi.WKID) string {
 			b.WriteString(fmt.Sprintf("+ %d more\n", len(subjectIDs)-100))
 			break
 		}
-		subject, err := wanikani.GetSubject(context.Background(), subjectID)
+		subject, err := wanikani.GetSubject(context.Background(), m.subjectRepo, subjectID)
 		if err != nil {
-			b.WriteString("\n  skipped " + string(subject.GetObject().ObjectType) + "due to error: " + err.Error() + "\n")
+			b.WriteString("\n  skipped due to error: " + err.Error() + "\n")
 		} else if subject.KanjiData != nil {
 			b.WriteString(ui.Kanji(subject.KanjiData.Characters))
 			if subjectCount < len(subjectIDs)-1 {
