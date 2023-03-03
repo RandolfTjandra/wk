@@ -61,22 +61,21 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 	case *wanikaniapi.Summary:
 		m.Summary = msg
-		i := 0
+		m.SummaryLessons = []*wanikaniapi.SummaryLesson{}
 		// prep summary lessons
 		for _, lesson := range m.Summary.Data.Lessons {
 			if len(lesson.SubjectIDs) == 0 {
 				continue
 			}
 			m.SummaryLessons = append(m.SummaryLessons, lesson)
-			i++
 		}
 		// prep summary reviews
+		m.SummaryReviews = []*wanikaniapi.SummaryReview{}
 		for _, review := range m.Summary.Data.Reviews {
 			if len(review.SubjectIDs) == 0 {
 				continue
 			}
 			m.SummaryReviews = append(m.SummaryReviews, review)
-			i++
 		}
 	case []*wanikaniapi.Subject:
 		m.SummarySubjects[m.cursors[SummaryView]] = msg
