@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
 	"os"
@@ -13,17 +12,11 @@ import (
 )
 
 func main() {
-	database, err := sql.Open("sqlite3", "wk.db")
+	database, err := db.InitDatabase()
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	defer database.Close()
-
-	sts := `
-CREATE TABLE IF NOT EXISTS subjects(id INTEGER PRIMARY KEY, subject TEXT);
-`
-	_, err = database.Exec(sts)
 
 	subjectRepo := db.NewSubjectRepo(database)
 
