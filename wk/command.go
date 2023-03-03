@@ -2,97 +2,92 @@ package main
 
 import (
 	"context"
-	"encoding/json"
+	"log"
 
 	"github.com/brandur/wanikaniapi"
 	tea "github.com/charmbracelet/bubbletea"
 
+	"wk/pkg/db"
 	"wk/pkg/wanikani"
 )
+
+type errMsg struct{ err error }
+
+func (e errMsg) Error() string { return e.err.Error() }
 
 type wkRes struct {
 	httpStatus int
 	resBody    int
 }
 
-func getUser() tea.Msg {
-	user, err := wanikani.GetUser(context.Background())
+type Commander interface {
+	GetUser() tea.Msg
+	GetSummary() tea.Msg
+	GetSubjects(subjectIDs []wanikaniapi.WKID) func() tea.Msg
+}
+
+type commander struct {
+	subjectRepo    db.SubjectRepo
+	wanikaniClient *wanikaniapi.Client
+}
+
+func NewCommander(live bool, subjectRepo db.SubjectRepo, wanikaniClient *wanikaniapi.Client) Commander {
+	if live {
+		return commander{
+			subjectRepo:    subjectRepo,
+			wanikaniClient: wanikaniClient,
+		}
+	} else {
+		return mockCommander{}
+	}
+}
+
+func (c commander) GetUser() tea.Msg {
+	user, err := wanikani.GetUser(context.Background(), c.wanikaniClient)
 	if err != nil {
 		return errMsg{err}
 	}
 	return user
 }
 
-func getAssignments() tea.Msg {
-	assignmentPage, err := wanikani.GetAssignments(context.Background())
+func (c commander) GetSummary() tea.Msg {
+	summary, err := wanikani.GetSummary(context.Background(), c.wanikaniClient)
 	if err != nil {
-		// There was an error making our request. Wrap the error we received
-		// in a message and return it.
+		return errMsg{err}
+	}
+
+	return summary
+}
+
+func (c commander) GetAssignments() tea.Msg {
+	assignmentPage, err := wanikani.GetAssignments(context.Background(), c.wanikaniClient)
+	if err != nil {
 		return errMsg{err}
 	}
 
 	return assignmentPage
 }
 
-func getSummary() tea.Msg {
-	if false {
-		example := []byte(`{
-	"object": "report",
-	"url": "https://api.wanikani.com/v2/summary",
-	"data_updated_at": "2018-04-11T21:00:00.000000Z",
-	"data": {
-		"lessons": [
-			{
-				"available_at": "2018-04-11T21:00:00.000000Z",
-				"subject_ids": [
-					25,
-					26
-				]
-			}
-		],
-		"next_reviews_at": "2018-04-11T21:00:00.000000Z",
-		"reviews": [
-			{
-				"available_at": "2018-04-11T21:00:00.000000Z",
-				"subject_ids": [
-					21,
-					23,
-					24
-				]
-			},
-			{
-				"available_at": "2018-04-11T22:00:00.000000Z",
-				"subject_ids": []
-			}
-		]
-	}
-	}`)
-		foo := wanikaniapi.Summary{}
-		err := json.Unmarshal(example, &foo)
-		if err == nil {
-			return &foo
-		} else {
-			return errMsg{err}
+func (c commander) GetSubjects(subjectIDs []wanikaniapi.WKID) func() tea.Msg {
+	subjectCount := 0
+	subjects := []*wanikaniapi.Subject{}
+	for _, subjectID := range subjectIDs {
+		if subjectCount == 100 { // cap to avoid rate limiting
+			break
 		}
-	} else {
-		// real. above is debugging with sample
-		wkClient := wanikaniapi.NewClient(&wanikaniapi.ClientConfig{
-			APIToken: wanikani.ApiKey,
-		})
-
-		res, err := wkClient.SummaryGet(&wanikaniapi.SummaryGetParams{})
+		subject, err := wanikani.GetSubject(context.Background(), c.subjectRepo, *c.wanikaniClient, subjectID)
 		if err != nil {
-			// There was an error making our request. Wrap the error we received
-			// in a message and return it.
-			return errMsg{err}
+			log.Print("\n  skipped due to error: " + err.Error() + "\n")
+			continue
 		}
-
-		return res
+		if subject.KanjiData != nil ||
+			subject.VocabularyData != nil ||
+			(subject.RadicalData != nil && subject.RadicalData.Characters != nil) {
+			subjects = append(subjects, subject)
+			subjectCount++
+		}
+	}
+	return func() tea.Msg {
+		return subjects
 	}
 }
-
-type errMsg struct{ err error }
-
-// For messages that contain errors it's often handy to also implement the
-// error interface on the message.
-func (e errMsg) Error() string { return e.err.Error() }

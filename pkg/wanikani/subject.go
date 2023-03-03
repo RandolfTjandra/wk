@@ -10,14 +10,14 @@ import (
 	"wk/pkg/db"
 )
 
-// Return a single subject cached
-func GetSubject(ctx context.Context, subjectRepo db.SubjectRepo, subjectID wanikaniapi.WKID) (*wanikaniapi.Subject, error) {
+// Return a single subject saved to db
+func GetSubject(ctx context.Context,
+	subjectRepo db.SubjectRepo,
+	wkClient wanikaniapi.Client,
+	subjectID wanikaniapi.WKID,
+) (*wanikaniapi.Subject, error) {
 	subjectRaw, err := subjectRepo.GetByID(ctx, int(subjectID))
 	if err != nil { // get from api
-		wkClient := wanikaniapi.NewClient(&wanikaniapi.ClientConfig{
-			APIToken: ApiKey,
-		})
-
 		res, err := wkClient.SubjectGet(&wanikaniapi.SubjectGetParams{ID: &subjectID})
 		if err != nil {
 			return &wanikaniapi.Subject{}, err
@@ -30,17 +30,4 @@ func GetSubject(ctx context.Context, subjectRepo db.SubjectRepo, subjectID wanik
 	json.Unmarshal([]byte(subjectRaw), &subject)
 
 	return &subject, nil
-}
-
-// Get assignments
-func GetAssignments(ctx context.Context) (*wanikaniapi.AssignmentPage, error) {
-	wkClient := wanikaniapi.NewClient(&wanikaniapi.ClientConfig{
-		APIToken: ApiKey,
-	})
-	res, err := wkClient.AssignmentList(&wanikaniapi.AssignmentListParams{})
-	if err != nil {
-		return nil, err
-	}
-
-	return res, nil
 }

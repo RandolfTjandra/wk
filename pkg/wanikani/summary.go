@@ -3,27 +3,26 @@ package wanikani
 import (
 	"context"
 	"encoding/json"
+	"time"
 
 	"github.com/brandur/wanikaniapi"
 	redis "github.com/redis/go-redis/v9"
 )
 
-const UserKey = "user"
-
-func GetUser(ctx context.Context, wkClient *wanikaniapi.Client) (*wanikaniapi.User, error) {
+func GetSummary(ctx context.Context, wkClient *wanikaniapi.Client) (*wanikaniapi.Summary, error) {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     RedisAddr,
 		Password: "", // no password set
 		DB:       0,  // use default DB
 	})
-	val, err := rdb.Get(ctx, UserKey).Result()
+	val, err := rdb.Get(ctx, "summary").Result()
 	if err != nil { // get from api
-		res, err := wkClient.UserGet(&wanikaniapi.UserGetParams{})
+		res, err := wkClient.SummaryGet(&wanikaniapi.SummaryGetParams{})
 		marshalled, _ := json.Marshal(res)
-		rdb.Set(ctx, UserKey, marshalled, 0)
+		rdb.Set(ctx, "summary", marshalled, 24*time.Hour)
 		return res, err
 	}
-	resource := wanikaniapi.User{}
+	resource := wanikaniapi.Summary{}
 	json.Unmarshal([]byte(val), &resource)
 
 	return &resource, nil
