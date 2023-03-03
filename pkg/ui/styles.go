@@ -12,9 +12,10 @@ import (
 )
 
 const (
-	progressBarWidth  = 71
-	progressFullChar  = "█"
-	progressEmptyChar = "░"
+	progressFullChar      = "█"
+	progressEmptyChar     = "░"
+	progressBarLeftColor  = "#B14FFF"
+	progressBarRightColor = "#00FFA3"
 )
 
 // styling
@@ -30,13 +31,25 @@ var (
 	Kanji   = makeFgBgStyle("#E5E5E5", "#FF00AA")
 	Vocab   = makeFgBgStyle("#E5E5E5", "#9400FF")
 
-	ramp = makeRamp("#B14FFF", "#00FFA3", progressBarWidth)
+	highlight = lipgloss.AdaptiveColor{Light: "#874BFD", Dark: "#7D56F4"}
+	special   = lipgloss.AdaptiveColor{Light: "#43BF6D", Dark: "#73F59F"}
+	warn      = lipgloss.AdaptiveColor{Light: "#BD3762", Dark: "#E04376"}
 
 	H1Title = lipgloss.NewStyle().
-		Width(80).
+		Width(78).
 		Align(lipgloss.Center).
 		BorderStyle(lipgloss.RoundedBorder()).
-		BorderForeground(lipgloss.Color("63"))
+		BorderForeground(lipgloss.Color("63")).Margin(1, 2)
+
+	CheckMark = lipgloss.NewStyle().SetString("✓").
+			Foreground(special).
+			PaddingRight(1).
+			String()
+
+	BatsuMark = lipgloss.NewStyle().SetString("x").
+			Foreground(warn).
+			PaddingRight(1).
+			String()
 )
 
 func makeFgStyle(color string) func(string) string {
@@ -79,11 +92,12 @@ func makeRamp(colorA, colorB string, steps float64) (s []string) {
 }
 
 func Progressbar(width int, numerator float64, denominator float64) string {
-	w := float64(progressBarWidth)
+	w := float64(width)
 	percent := numerator / denominator
 
 	fullSize := int(math.Round(w * percent))
 	var fullCells string
+	ramp := makeRamp(progressBarLeftColor, progressBarRightColor, w)
 	for i := 0; i < fullSize; i++ {
 		fullCells += termenv.String(progressFullChar).Foreground(term.Color(ramp[i])).String()
 	}

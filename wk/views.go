@@ -9,6 +9,7 @@ import (
 	"wk/pkg/ui"
 
 	"github.com/brandur/wanikaniapi"
+	"github.com/charmbracelet/lipgloss"
 )
 
 // Views
@@ -50,20 +51,54 @@ func (m model) View() string {
 func (m model) indexView() string {
 	var b strings.Builder
 	b.WriteString(ui.H1Title.Render("Wk"))
-	b.WriteString("\n\n")
+	b.WriteString("\n")
 	if m.User != nil {
-		b.WriteString("  Hello " + m.User.Data.Username + "\n")
-		b.WriteString("  Level Progress:\n\n")
-		b.WriteString("  " + ui.Progressbar(80, float64(m.User.Data.Level), 50) + "\n\n")
+		b.WriteString("  Hello " + m.User.Data.Username + "..\n\n")
+		barTitle := "  Level Progress:"
+		bar := lipgloss.NewStyle().Width(60).Align(lipgloss.Right).Render(
+			ui.Progressbar(50, float64(m.User.Data.Level), 50),
+		)
+		b.WriteString("  " + lipgloss.JoinHorizontal(0, barTitle, bar) + "\n\n")
 	}
+	var choices strings.Builder
 	for i, choice := range m.navChoices {
 		if i == m.cursors[IndexView] {
 			cursor := ui.Keyword(">")
-			b.WriteString(fmt.Sprintf("  %s %s\n", cursor, choice))
+			choices.WriteString(fmt.Sprintf("%s %s", cursor, choice))
 		} else {
-			b.WriteString(fmt.Sprintf("    %s\n", choice))
+			choices.WriteString(fmt.Sprintf("  %s", choice))
+		}
+		if i < len(m.navChoices)-1 {
+			choices.WriteString("\n")
 		}
 	}
+	renderedContent := lipgloss.NewStyle().
+		BorderStyle(lipgloss.RoundedBorder()).
+		BorderForeground(lipgloss.Color("87")).
+		MarginLeft(2).Padding(0, 2, 0, 1).
+		Render(choices.String())
+
+	if m.User != nil {
+		activeStatus := ui.BatsuMark
+		if m.User.Data.Subscription.Active {
+			activeStatus = ui.CheckMark
+		}
+		userDataContent := fmt.Sprintf(
+			"Subscription\n"+
+				"Active: %s\n"+
+				"Type:   %s",
+			activeStatus,
+			m.User.Data.Subscription.Type,
+		)
+		userData := lipgloss.NewStyle().
+			BorderStyle(lipgloss.RoundedBorder()).
+			BorderForeground(lipgloss.Color("87")).
+			MarginLeft(1).Padding(0, 2, 0, 1).
+			Render(userDataContent)
+		renderedContent = lipgloss.JoinHorizontal(0, renderedContent, userData)
+	}
+	b.WriteString(renderedContent)
+
 	b.WriteString("\n\n")
 	return b.String()
 }
