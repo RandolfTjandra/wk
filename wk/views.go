@@ -1,14 +1,12 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
 
 	"wk/pkg/ui"
-	"wk/pkg/wanikani"
 
 	"github.com/brandur/wanikaniapi"
 )
@@ -37,8 +35,6 @@ func (m model) View() string {
 		b.WriteString(m.indexView())
 	case SummaryView:
 		b.WriteString(m.summaryView())
-	case LessonsView:
-		b.WriteString(m.lessonsView())
 	default:
 		b.WriteString("incomplete: work in progress\n")
 	}
@@ -88,7 +84,6 @@ func (m model) summaryView() string {
 	var b strings.Builder
 	b.WriteString(ui.H1Title.Render("Summary"))
 	b.WriteString("\n\n")
-	// Render lessons
 	b.WriteString("  Lessons:")
 	for i, lesson := range m.SummaryLessons {
 		if m.cursors[SummaryView] == i {
@@ -103,7 +98,13 @@ func (m model) summaryView() string {
 			lesson.AvailableAt.Local().Format(time.TimeOnly),
 		))
 		if m.SummaryExpansion[i] {
-			b.WriteString("\n  " + m.renderSubjects(lesson.SubjectIDs))
+			b.WriteString("\n  " + m.renderSubjects(m.SummarySubjects[i]))
+			renderedCount := len(m.SummarySubjects[i])
+			count := len(m.SummaryLessons[i].SubjectIDs)
+			missingCount := count - renderedCount
+			if missingCount > 0 {
+				b.WriteString(fmt.Sprintf("+%d more", missingCount))
+			}
 		}
 	}
 	b.WriteString("\n\n")
@@ -123,70 +124,39 @@ func (m model) summaryView() string {
 			review.AvailableAt.Local().Format(time.TimeOnly),
 		))
 		if m.SummaryExpansion[i+len(m.SummaryLessons)] {
-			b.WriteString("\n  " + m.renderSubjects(review.SubjectIDs))
+			b.WriteString("\n  " + m.renderSubjects(m.SummarySubjects[i+len(m.SummaryLessons)]))
+			renderedCount := len(m.SummarySubjects[i+len(m.SummaryLessons)])
+			count := len(m.SummaryReviews[i].SubjectIDs)
+			missingCount := count - renderedCount
+			if missingCount > 0 {
+				b.WriteString(fmt.Sprintf("+%d more", missingCount))
+			}
 		}
 	}
 
 	return b.String() + "\n"
 }
 
-// Render lessons view
-func (m model) lessonsView() string {
-	if m.Summary == nil {
-		return "loading..."
-	}
-	var b strings.Builder
-	b.WriteString("  ===== Lessons =====\n\n")
-	b.WriteString("  Lessons\n")
-	for _, lesson := range m.Summary.Data.Lessons {
-		b.WriteString(fmt.Sprintf("  Available at %s\n\n", lesson.AvailableAt.Format(time.RFC1123)))
-		b.WriteString(fmt.Sprintf("    %d subjects:\n\n", len(lesson.SubjectIDs)))
-		for i, subjectID := range lesson.SubjectIDs {
-			subject, err := wanikani.GetSubject(context.Background(), m.subjectRepo, subjectID)
-			if err != nil {
-				b.WriteString("\n  skipped " + string(subject.GetObject().ObjectType) + "due to error: " + err.Error() + "\n")
-			} else if subject.KanjiData != nil {
-				b.WriteString(fmt.Sprintf("  %s, ", subject.KanjiData.Characters))
-			} else if subject.VocabularyData != nil {
-				b.WriteString(fmt.Sprintf("  %s, ", subject.VocabularyData.Characters))
-			} else {
-				b.WriteString("\n  skipped " + string(subject.GetObject().ObjectType) + "\n")
-			}
-			if i > 0 && i%10 == 0 {
-				b.WriteString("\n")
-			}
-		}
-	}
-	return b.String() + "\n"
-}
-
-// gets and renders a list of subjects
-func (m model) renderSubjects(subjectIDs []wanikaniapi.WKID) string {
+// renders a list of subjects
+func (m model) renderSubjects(subjects []*wanikaniapi.Subject) string {
 	var b strings.Builder
 	subjectCount := 0
-	for _, subjectID := range subjectIDs {
-		if subjectCount == 100 {
-			b.WriteString(fmt.Sprintf("+ %d more\n", len(subjectIDs)-100))
-			break
-		}
-		subject, err := wanikani.GetSubject(context.Background(), m.subjectRepo, subjectID)
-		if err != nil {
-			b.WriteString("\n  skipped due to error: " + err.Error() + "\n")
-		} else if subject.KanjiData != nil {
+	for _, subject := range subjects {
+		if subject.KanjiData != nil {
 			b.WriteString(ui.Kanji(subject.KanjiData.Characters))
-			if subjectCount < len(subjectIDs)-1 {
+			if subjectCount < len(subjects)-1 {
 				b.WriteString(", ")
 			}
 			subjectCount++
 		} else if subject.VocabularyData != nil {
 			b.WriteString(ui.Vocab(subject.VocabularyData.Characters))
-			if subjectCount < len(subjectIDs)-1 {
+			if subjectCount < len(subjects)-1 {
 				b.WriteString(", ")
 			}
 			subjectCount++
 		} else if subject.RadicalData != nil && subject.RadicalData.Characters != nil {
 			b.WriteString(ui.Radical(*subject.RadicalData.Characters))
-			if subjectCount < len(subjectIDs)-1 {
+			if subjectCount < len(subjects)-1 {
 				b.WriteString(", ")
 			}
 			subjectCount++
@@ -194,7 +164,9 @@ func (m model) renderSubjects(subjectIDs []wanikaniapi.WKID) string {
 			foo, _ := json.Marshal(subject)
 			b.WriteString("\n\n" + string(foo) + "\n\n")
 		}
-		if subjectCount > 0 && subjectCount%10 == 0 { // hopefully can delete this if line wrap can work
+
+		// hopefully can delete this if line wrap can work
+		if subjectCount > 0 && subjectCount%10 == 0 {
 			b.WriteString("\n  ")
 		}
 	}

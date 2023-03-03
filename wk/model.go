@@ -8,28 +8,34 @@ import (
 )
 
 type model struct {
+	commander Commander
+
 	navChoices  []PageView
 	currentPage PageView
 	cursors     map[PageView]int
 	response    []byte
 	err         error
-	subjectRepo db.SubjectRepo
 
 	User *wanikaniapi.User
 
-	Summary          *wanikaniapi.Summary
-	SummaryLessons   []*wanikaniapi.SummaryLesson
-	SummaryReviews   []*wanikaniapi.SummaryReview
+	Summary        *wanikaniapi.Summary
+	SummaryLessons []*wanikaniapi.SummaryLesson
+	SummaryReviews []*wanikaniapi.SummaryReview
+
+	// The following maps represent SummaryLessons and SummaryReviews stacked on
+	// top of each other. This is so that navigation can be managed by a single
+	// slice
 	SummaryExpansion map[int]bool
+	SummarySubjects  map[int][]*wanikaniapi.Subject
 }
 
 func (m model) Init() tea.Cmd {
-	return tea.Batch(getUser, tea.EnterAltScreen)
+	return tea.Batch(m.commander.GetUser, tea.EnterAltScreen)
 }
 
-func initialModel(view PageView, subjectRepo db.SubjectRepo) model {
+func initialModel(commander Commander, view PageView, subjectRepo db.SubjectRepo) model {
 	return model{
-		subjectRepo: subjectRepo,
+		commander:   commander,
 		currentPage: view,
 		navChoices: []PageView{
 			SummaryView,
@@ -44,6 +50,7 @@ func initialModel(view PageView, subjectRepo db.SubjectRepo) model {
 			SummaryView: 0,
 		},
 		SummaryExpansion: make(map[int]bool),
+		SummarySubjects:  make(map[int][]*wanikaniapi.Subject),
 	}
 }
 
@@ -71,7 +78,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.SummaryReviews = append(m.SummaryReviews, review)
 			i++
 		}
-		return m, nil
+	case []*wanikaniapi.Subject:
+		m.SummarySubjects[m.cursors[SummaryView]] = msg
 	case errMsg:
 		m.err = msg
 		return m, tea.Quit
@@ -111,10 +119,21 @@ func (m model) handleKeyPress(key tea.KeyMsg) (tea.Model, tea.Cmd) {
 			m.currentPage = m.navChoices[m.cursors[IndexView]]
 			switch m.currentPage {
 			case SummaryView:
-				return m, getSummary
+				return m, m.commander.GetSummary
 			}
 		case SummaryView:
 			m.SummaryExpansion[m.cursors[SummaryView]] = !m.SummaryExpansion[m.cursors[SummaryView]]
+			if m.SummaryExpansion[m.cursors[SummaryView]] {
+				cursor := m.cursors[SummaryView]
+				var subjectIDs []wanikaniapi.WKID
+				if cursor < len(m.SummaryLessons) {
+					subjectIDs = m.SummaryLessons[cursor].SubjectIDs
+				} else {
+					cursor = cursor - len(m.SummaryLessons)
+					subjectIDs = m.SummaryReviews[cursor].SubjectIDs
+				}
+				return m, m.commander.GetSubjects(subjectIDs)
+			}
 		}
 	}
 	return m, nil

@@ -5,10 +5,12 @@ import (
 	"log"
 	"os"
 
+	"github.com/brandur/wanikaniapi"
 	tea "github.com/charmbracelet/bubbletea"
 	_ "github.com/mattn/go-sqlite3"
 
 	"wk/pkg/db"
+	"wk/pkg/wanikani"
 )
 
 func main() {
@@ -20,7 +22,13 @@ func main() {
 
 	subjectRepo := db.NewSubjectRepo(database)
 
-	model := initialModel(IndexView, subjectRepo)
+	wkClient := wanikaniapi.NewClient(&wanikaniapi.ClientConfig{
+		APIToken: wanikani.ApiKey,
+	})
+
+	commander := NewCommander(true, subjectRepo, wkClient)
+
+	model := initialModel(commander, IndexView, subjectRepo)
 	p := tea.NewProgram(model, tea.WithAltScreen())
 	if err := p.Start(); err != nil {
 		fmt.Printf("Error starting: %v", err)
