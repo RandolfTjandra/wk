@@ -10,7 +10,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 
 	"wk/pkg/db"
-	"wk/pkg/wanikani"
 )
 
 func main() {
@@ -22,8 +21,14 @@ func main() {
 
 	subjectRepo := db.NewSubjectRepo(database)
 
+	apiKey, ok := os.LookupEnv("WK_KEY")
+	if !ok {
+		fmt.Printf("no API key: %v", err)
+		os.Exit(1)
+	}
+
 	wkClient := wanikaniapi.NewClient(&wanikaniapi.ClientConfig{
-		APIToken: wanikani.ApiKey,
+		APIToken: apiKey,
 	})
 
 	commander := NewCommander(true, subjectRepo, wkClient)

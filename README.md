@@ -24,8 +24,9 @@ To install WaniKani CLI Tool, simply clone the repository and build the binary f
 ```
 $ git clone git@github.com:RandolfTjandra/wk.git
 $ cd wk 
+$ export WK_KEY="your wanikani api key"
 $ make build-wk
-$ ./dist/wk/bootstrap
+$ ./dist/wk/wk
 ```
 
 Once you have built the binary, you can run the tool using the following command:
