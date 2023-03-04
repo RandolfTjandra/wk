@@ -144,3 +144,45 @@ func (c mockCommander) GetSubjects(subjectIDs []wanikaniapi.WKID) func() tea.Msg
 		}
 	}
 }
+
+func (c mockCommander) GetReviews() tea.Msg {
+	example := []byte(`{
+  "object": "collection",
+  "url": "https://api.wanikani.com/v2/reviews",
+  "pages": {
+    "per_page": 1000,
+    "next_url": "https://api.wanikani.com/v2/reviews?page_after_id=534345",
+    "previous_url": null
+  },
+  "total_count": 19201,
+  "data_updated_at": "2017-12-20T01:10:17.578705Z",
+  "data": [
+    {
+      "id": 534342,
+      "object": "review",
+      "url": "https://api.wanikani.com/v2/reviews/534342",
+      "data_updated_at": "2017-12-20T01:00:59.255427Z",
+      "data": {
+        "created_at": "2017-12-20T01:00:59.255427Z",
+        "assignment_id": 32132,
+        "spaced_repetition_system_id": 1,
+        "subject_id": 8,
+        "starting_srs_stage": 4,
+        "ending_srs_stage": 2,
+        "incorrect_meaning_answers": 1,
+        "incorrect_reading_answers": 0
+      }
+    }
+  ]
+}`)
+	resource := wanikaniapi.ReviewPage{}
+	err := json.Unmarshal(example, &resource)
+
+	return func() tea.Msg {
+		if err == nil {
+			return &resource
+		} else {
+			return errMsg{err}
+		}
+	}
+}

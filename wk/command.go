@@ -24,6 +24,7 @@ type Commander interface {
 	GetUser() tea.Msg
 	GetSummary() tea.Msg
 	GetSubjects(subjectIDs []wanikaniapi.WKID) func() tea.Msg
+	GetReviews() tea.Msg
 }
 
 type commander struct {
@@ -42,6 +43,7 @@ func NewCommander(live bool, subjectRepo db.SubjectRepo, wanikaniClient *wanikan
 	}
 }
 
+// return *wanikaniapi.User
 func (c commander) GetUser() tea.Msg {
 	user, err := wanikani.GetUser(context.Background(), c.wanikaniClient)
 	if err != nil {
@@ -50,6 +52,16 @@ func (c commander) GetUser() tea.Msg {
 	return user
 }
 
+// return *wanikaniapi.ReviewPage
+func (c commander) GetReviews() tea.Msg {
+	reviews, err := wanikani.GetReviews(context.Background(), c.wanikaniClient)
+	if err != nil {
+		return errMsg{err}
+	}
+	return reviews
+}
+
+// return *wanikaniapi.Summary
 func (c commander) GetSummary() tea.Msg {
 	summary, err := wanikani.GetSummary(context.Background(), c.wanikaniClient)
 	if err != nil {
@@ -59,6 +71,7 @@ func (c commander) GetSummary() tea.Msg {
 	return summary
 }
 
+// return *wanikaniapi.AssignmentPage
 func (c commander) GetAssignments() tea.Msg {
 	assignmentPage, err := wanikani.GetAssignments(context.Background(), c.wanikaniClient)
 	if err != nil {
@@ -68,6 +81,7 @@ func (c commander) GetAssignments() tea.Msg {
 	return assignmentPage
 }
 
+// return []*wanikaniapi.Subject
 func (c commander) GetSubjects(subjectIDs []wanikaniapi.WKID) func() tea.Msg {
 	subjectCount := 0
 	subjects := []*wanikaniapi.Subject{}
