@@ -23,6 +23,7 @@ const (
 	LessonsView     PageView = "lessons"
 	ReviewsView     PageView = "reviews"
 	SettingsView    PageView = "settings"
+	AccountView     PageView = "account"
 	DebuggingView   PageView = "debugging"
 )
 
@@ -36,6 +37,8 @@ func (m model) View() string {
 		b.WriteString(m.indexView())
 	case SummaryView:
 		b.WriteString(m.summaryView())
+	case AccountView:
+		b.WriteString(m.accountView())
 	default:
 		b.WriteString("incomplete: work in progress\n")
 	}
@@ -78,25 +81,6 @@ func (m model) indexView() string {
 		MarginLeft(2).Padding(0, 2, 0, 1).
 		Render(choices.String())
 
-	if m.User != nil {
-		activeStatus := ui.BatsuMark
-		if m.User.Data.Subscription.Active {
-			activeStatus = ui.CheckMark
-		}
-		userDataContent := fmt.Sprintf(
-			"Subscription\n"+
-				"Active: %s\n"+
-				"Type:   %s",
-			activeStatus,
-			m.User.Data.Subscription.Type,
-		)
-		userData := lipgloss.NewStyle().
-			BorderStyle(lipgloss.RoundedBorder()).
-			BorderForeground(lipgloss.Color("87")).
-			MarginLeft(1).Padding(0, 2, 0, 1).
-			Render(userDataContent)
-		renderedContent = lipgloss.JoinHorizontal(0, renderedContent, userData)
-	}
 	b.WriteString(renderedContent)
 
 	b.WriteString("\n\n")
@@ -170,6 +154,28 @@ func (m model) summaryView() string {
 	}
 
 	return b.String() + "\n"
+}
+
+func (m model) accountView() string {
+	var b strings.Builder
+	activeStatus := ui.BatsuMark
+	if m.User.Data.Subscription.Active {
+		activeStatus = ui.CheckMark
+	}
+	userDataContent := fmt.Sprintf(
+		"Subscription\n"+
+			"Active: %s\n"+
+			"Type:   %s",
+		activeStatus,
+		m.User.Data.Subscription.Type,
+	)
+	userData := lipgloss.NewStyle().
+		BorderStyle(lipgloss.RoundedBorder()).
+		BorderForeground(lipgloss.Color("87")).
+		MarginLeft(1).Padding(0, 2, 0, 1).
+		Render(userDataContent)
+	b.WriteString(userData)
+	return b.String()
 }
 
 // renders a list of subjects
