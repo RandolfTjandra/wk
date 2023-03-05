@@ -10,6 +10,7 @@ build-wk:
 			 ./wk/model.go \
 			 ./wk/command.go \
 			 ./wk/mock_command.go \
+			 ./wk/navigation.go \
 			 ./wk/views.go
 
 package-wk: build-wk
