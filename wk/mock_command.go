@@ -186,3 +186,41 @@ func (c mockCommander) GetReviews() tea.Msg {
 		}
 	}
 }
+
+func (c mockCommander) GetVoiceActors() tea.Msg {
+	example := []byte(`{
+  "object": "collection",
+  "url": "https://api.wanikani.com/v2/voice_actors",
+  "pages": {
+    "per_page": 500,
+    "next_url": null,
+    "previous_url": null
+  },
+  "total_count": 2,
+  "data_updated_at": "2017-11-29T19:37:03.571377Z",
+  "data": [
+    {
+      "id": 234,
+      "object": "voice_actor",
+      "url": "https://api.wanikani.com/v2/voice_actors/1",
+      "data_updated_at": "2017-12-20T00:24:47.048380Z",
+      "data": {
+        "created_at": "2017-12-20T00:03:56.642838Z",
+        "name": "Kyoko",
+        "gender": "female",
+        "description": "Tokyo accent"
+      }
+    }
+  ]
+}`)
+	resource := wanikaniapi.VoiceActorPage{}
+	err := json.Unmarshal(example, &resource)
+
+	return func() tea.Msg {
+		if err == nil {
+			return &resource
+		} else {
+			return errMsg{err}
+		}
+	}
+}

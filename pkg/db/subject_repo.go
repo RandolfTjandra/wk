@@ -23,7 +23,7 @@ func (r *subjectRepo) GetByID(ctx context.Context, subjectID int) (subjectRaw st
 func (r *subjectRepo) Insert(subjectID int, subject string) (err error) {
 	q := `insert into subjects (id, subject)
 	values ($1, $2)`
-	_, err = r.db.Exec(q, subjectID, string(subject))
+	_, err = r.db.Exec(q, subjectID, subject)
 	return
 }
 
