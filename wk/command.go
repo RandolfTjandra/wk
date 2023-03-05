@@ -25,6 +25,7 @@ type Commander interface {
 	GetSummary() tea.Msg
 	GetSubjects(subjectIDs []wanikaniapi.WKID) func() tea.Msg
 	GetReviews() tea.Msg
+	GetVoiceActors() tea.Msg
 }
 
 type commander struct {
@@ -104,4 +105,14 @@ func (c commander) GetSubjects(subjectIDs []wanikaniapi.WKID) func() tea.Msg {
 	return func() tea.Msg {
 		return subjects
 	}
+}
+
+// return *wanikaniapi.VoiceActorPage
+func (c commander) GetVoiceActors() tea.Msg {
+	assignmentPage, err := wanikani.GetAssignments(context.Background(), c.wanikaniClient)
+	if err != nil {
+		return errMsg{err}
+	}
+
+	return assignmentPage
 }
