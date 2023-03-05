@@ -43,7 +43,7 @@ func initialModel(commander Commander, view PageView, subjectRepo db.SubjectRepo
 			AssignmentsView,
 			ReviewsView,
 			SettingsView,
-			DebuggingView,
+			AccountView,
 		},
 		cursors: map[PageView]int{
 			IndexView:   0,
@@ -54,6 +54,7 @@ func initialModel(commander Commander, view PageView, subjectRepo db.SubjectRepo
 	}
 }
 
+// Receives information and updates the model
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case *wanikaniapi.User:
@@ -116,6 +117,7 @@ func (m model) handleKeyPress(key tea.KeyMsg) (tea.Model, tea.Cmd) {
 		switch m.currentPage {
 		case IndexView:
 			m.currentPage = m.navChoices[m.cursors[IndexView]]
+			// Set up what has to happen when a new page is selected
 			switch m.currentPage {
 			case SummaryView:
 				return m, m.commander.GetSummary
@@ -133,6 +135,8 @@ func (m model) handleKeyPress(key tea.KeyMsg) (tea.Model, tea.Cmd) {
 				}
 				return m, m.commander.GetSubjects(subjectIDs)
 			}
+		case AccountView:
+			return m, nil
 		}
 	}
 	return m, nil
