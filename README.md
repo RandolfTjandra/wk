@@ -4,7 +4,7 @@ WaniKani CLI Tool is a command line interface (CLI) tool designed to connect to 
 
 With WaniKani CLI Tool, you can quickly and easily check your current level, review statistics, and progress charts. It's perfect for those who want to keep track of their WaniKani learning journey without having to navigate through the WaniKani website.
 
-https://user-images.githubusercontent.com/1756067/222019921-e045ea25-3c1c-4d97-a2be-842df314e9ce.mp4
+https://user-images.githubusercontent.com/1756067/222995915-2548b764-6a54-4c79-b454-1ade6dfe3710.mov
 
 ## Features
 
