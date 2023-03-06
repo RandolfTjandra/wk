@@ -1,5 +1,4 @@
 # Installation package params
-PROJECT_NAME := wk 
 DIST_DIR  := dist
 
 build-wk:
@@ -19,4 +18,6 @@ package-wk: build-wk
 package-all: \
 package-wk
 
+local: build-wk
+	cp -f $(DIST_DIR)/wk/wk /usr/local/bin/
 

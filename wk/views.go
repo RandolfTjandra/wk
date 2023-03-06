@@ -31,17 +31,20 @@ func (m model) View() string {
 	if m.err != nil {
 		return fmt.Sprintf("\nWe had some trouble: %v\n\n", m.err)
 	}
+	m.content = ""
 	var b strings.Builder
 	switch m.currentPage {
 	case IndexView:
 		b.WriteString(m.indexView())
 	case SummaryView:
-		b.WriteString(m.summaryView())
+		m.content = m.summaryView()
+		b.WriteString(m.indexView())
 	case AccountView:
 		b.WriteString(m.accountView())
 	default:
 		b.WriteString("incomplete: work in progress\n")
 	}
+	// b.WriteString("debugging: " + m.content)
 
 	// The footer
 	b.WriteString(ui.Subtle("\n  j/k, up/down: select") + ui.Dot +
@@ -55,14 +58,46 @@ func (m model) indexView() string {
 	var b strings.Builder
 	b.WriteString(ui.H1Title.Render("Wk"))
 	b.WriteString("\n")
+
+	summaryHeader := ""
+
+	if m.Summary == nil {
+		summaryHeader = "loading summary..\n\n"
+	} else {
+		totalLessons := 0
+		for _, lesson := range m.SummaryLessons {
+			totalLessons += len(lesson.SubjectIDs)
+		}
+		totalReviews := 0
+		for _, review := range m.SummaryReviews {
+			totalReviews += len(review.SubjectIDs)
+		}
+		summaryHeader = fmt.Sprintf("%d lessons %d reviews", totalLessons, totalReviews)
+	}
+
 	if m.User != nil {
-		b.WriteString("  Hello " + m.User.Data.Username + "..\n\n")
-		barTitle := "  Level Progress:"
-		bar := lipgloss.NewStyle().Width(60).Align(lipgloss.Right).Render(
+		greeting := fmt.Sprintf("Hello %s..", m.User.Data.Username)
+		remainingWidth := ui.UIWidth - len(greeting)
+		summaryHeader = lipgloss.NewStyle().Width(remainingWidth).
+			AlignHorizontal(lipgloss.Right).
+			Render(summaryHeader)
+
+		greeting = lipgloss.JoinHorizontal(0, greeting, summaryHeader)
+		greeting = lipgloss.NewStyle().Width(ui.UIWidth).
+			Margin(0, ui.UIXMargin).Render(greeting)
+		b.WriteString(greeting)
+		b.WriteString("\n\n")
+
+		barTitle := lipgloss.NewStyle().Render("Level Progress:")
+		bar := lipgloss.NewStyle().Width(ui.UIWidth - len(barTitle) - 2*ui.UIXMargin).Align(lipgloss.Right).Render(
 			ui.Progressbar(50, float64(m.User.Data.Level), 50),
 		)
-		b.WriteString("  " + lipgloss.JoinHorizontal(0, barTitle, bar) + "\n\n")
+		loadingBar := lipgloss.JoinHorizontal(0, barTitle, bar)
+
+		b.WriteString(lipgloss.NewStyle().Margin(0, ui.UIXMargin).Padding(0, ui.UIXMargin).Render(loadingBar))
+		b.WriteString("\n\n")
 	}
+
 	var choices strings.Builder
 	for i, choice := range m.navChoices {
 		if i == m.cursors[IndexView] {
@@ -75,14 +110,14 @@ func (m model) indexView() string {
 			choices.WriteString("\n")
 		}
 	}
-	renderedContent := lipgloss.NewStyle().
+	renderedChoices := lipgloss.NewStyle().
 		BorderStyle(lipgloss.RoundedBorder()).
 		BorderForeground(lipgloss.Color("87")).
-		MarginLeft(2).Padding(0, 2, 0, 1).
+		MarginLeft(ui.UIXMargin).Padding(0, 2, 0, 1).
 		Render(choices.String())
 
-	b.WriteString(renderedContent)
-
+	main := lipgloss.JoinHorizontal(0, renderedChoices, m.content)
+	b.WriteString(main)
 	b.WriteString("\n\n")
 	return b.String()
 }
@@ -101,8 +136,8 @@ func (m model) summaryView() string {
 		return "loading..."
 	}
 	var b strings.Builder
-	b.WriteString(ui.H1Title.Render("Summary"))
-	b.WriteString("\n\n")
+	// b.WriteString(ui.H1Title.Render("Summary"))
+	// b.WriteString("\n\n")
 	b.WriteString("  Lessons:")
 	for i, lesson := range m.SummaryLessons {
 		if m.cursors[SummaryView] == i {
@@ -129,7 +164,7 @@ func (m model) summaryView() string {
 	b.WriteString("\n\n")
 
 	// Render reviews
-	b.WriteString("  Upcoming Reviews:")
+	b.WriteString("  Reviews:")
 	for i, review := range m.SummaryReviews {
 		if m.cursors[SummaryView] == i+len(m.SummaryLessons) {
 			cursor := ui.Keyword(">")

@@ -16,6 +16,10 @@ const (
 	progressEmptyChar     = "░"
 	progressBarLeftColor  = "#B14FFF"
 	progressBarRightColor = "#00FFA3"
+
+	UIWidth   = 80
+	UIXMargin = 2
+	UIYMargin = 1
 )
 
 // styling
@@ -35,11 +39,15 @@ var (
 	special   = lipgloss.AdaptiveColor{Light: "#43BF6D", Dark: "#73F59F"}
 	warn      = lipgloss.AdaptiveColor{Light: "#BD3762", Dark: "#E04376"}
 
+	Debug = lipgloss.NewStyle().
+		BorderStyle(lipgloss.RoundedBorder()).
+		BorderForeground(lipgloss.Color("#DD0044"))
+
 	H1Title = lipgloss.NewStyle().
-		Width(78).
+		Width(UIWidth-UIXMargin).
 		Align(lipgloss.Center).
 		BorderStyle(lipgloss.RoundedBorder()).
-		BorderForeground(lipgloss.Color("63")).Margin(1, 2)
+		BorderForeground(lipgloss.Color("63")).Margin(UIYMargin, UIXMargin)
 
 	CheckMark = lipgloss.NewStyle().SetString("✓").
 			Foreground(special).
