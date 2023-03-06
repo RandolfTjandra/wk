@@ -15,7 +15,6 @@ https://user-images.githubusercontent.com/1756067/222019921-e045ea25-3c1c-4d97-a
 
 ## Installation
 
-## Dependencies
 ### Redis
 [Install Guide](https://redis.io/docs/getting-started/installation/)
 
@@ -25,11 +24,16 @@ To install WaniKani CLI Tool, simply clone the repository and build the binary f
 $ git clone git@github.com:RandolfTjandra/wk.git
 $ cd wk 
 $ export WK_KEY="your wanikani api key"
-$ make build-wk
-$ ./dist/wk/wk
+$ make local
 ```
 
 Once you have built the binary, you can run the tool using the following command:
+
+```
+wk
+```
+
+This assumes /usr/local/bin is in your $PATH
 
 
 ## Usage
@@ -50,4 +54,5 @@ If you would like to contribute code, please fork the repository and submit a pu
 ## License
 
 WaniKani CLI Tool is released under the MIT License. See [LICENSE](https://github.com/randolftjandra/wk/blob/main/LICENSE) for more information.
+
 

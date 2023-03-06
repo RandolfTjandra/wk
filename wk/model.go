@@ -15,6 +15,7 @@ type model struct {
 	cursors     map[PageView]int
 	response    []byte
 	err         error
+	content     string
 
 	User *wanikaniapi.User
 
@@ -30,7 +31,7 @@ type model struct {
 }
 
 func (m model) Init() tea.Cmd {
-	return tea.Batch(m.commander.GetUser, tea.EnterAltScreen)
+	return tea.Batch(m.commander.GetUser, tea.EnterAltScreen, m.commander.GetSummary)
 }
 
 func initialModel(commander Commander, view PageView, subjectRepo db.SubjectRepo) model {
@@ -78,14 +79,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case *wanikaniapi.Summary:
 		m.Summary = msg
-		// prep summary lessons
+		// Reset summary lessons
+		m.SummaryLessons = []*wanikaniapi.SummaryLesson{}
 		for _, lesson := range m.Summary.Data.Lessons {
 			if len(lesson.SubjectIDs) == 0 {
 				continue
 			}
 			m.SummaryLessons = append(m.SummaryLessons, lesson)
 		}
-		// prep summary reviews
+		// Resest summary reviews
+		m.SummaryReviews = []*wanikaniapi.SummaryReview{}
 		for _, review := range m.Summary.Data.Reviews {
 			if len(review.SubjectIDs) == 0 {
 				continue
