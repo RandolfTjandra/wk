@@ -25,6 +25,7 @@ type Commander interface {
 	GetSummary() tea.Msg
 	GetSubjects(subjectIDs []wanikaniapi.WKID) func() tea.Msg
 	GetReviews() tea.Msg
+	GetAssignments() tea.Msg
 	GetVoiceActors() tea.Msg
 }
 
@@ -72,14 +73,14 @@ func (c commander) GetSummary() tea.Msg {
 	return summary
 }
 
-// return *wanikaniapi.AssignmentPage
+// return []*wanikaniapi.Assignment
 func (c commander) GetAssignments() tea.Msg {
-	assignmentPage, err := wanikani.GetAssignments(context.Background(), c.wanikaniClient)
+	assignments, err := wanikani.GetAssignments(context.Background(), c.wanikaniClient)
 	if err != nil {
 		return errMsg{err}
 	}
 
-	return assignmentPage
+	return assignments
 }
 
 // return []*wanikaniapi.Subject
@@ -109,10 +110,5 @@ func (c commander) GetSubjects(subjectIDs []wanikaniapi.WKID) func() tea.Msg {
 
 // return *wanikaniapi.VoiceActorPage
 func (c commander) GetVoiceActors() tea.Msg {
-	assignmentPage, err := wanikani.GetAssignments(context.Background(), c.wanikaniClient)
-	if err != nil {
-		return errMsg{err}
-	}
-
-	return assignmentPage
+	return nil
 }

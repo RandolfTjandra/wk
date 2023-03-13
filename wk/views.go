@@ -39,8 +39,15 @@ func (m model) View() string {
 	case SummaryView:
 		m.content = m.summaryView()
 		b.WriteString(m.indexView())
+	case ReviewsView:
+		m.content = m.reviewsView()
+		b.WriteString(m.indexView())
+	case AssignmentsView:
+		m.content = m.assignmentsView()
+		b.WriteString(m.indexView())
 	case AccountView:
-		b.WriteString(m.accountView())
+		m.content = m.accountView()
+		b.WriteString(m.indexView())
 	default:
 		b.WriteString("incomplete: work in progress\n")
 	}
@@ -62,16 +69,15 @@ func (m model) indexView() string {
 	summaryHeader := ""
 
 	if m.Summary == nil {
-		summaryHeader = "loading summary..\n\n"
+		summaryHeader = "loading summary.."
 	} else {
 		totalLessons := 0
 		for _, lesson := range m.SummaryLessons {
 			totalLessons += len(lesson.SubjectIDs)
 		}
-		totalReviews := 0
-		for _, review := range m.SummaryReviews {
-			totalReviews += len(review.SubjectIDs)
-		}
+		// The first review contains all the reviews currently available.
+		// Subsequent reviews contain reviews that will become available in the future.
+		totalReviews := len(m.SummaryReviews[0].SubjectIDs)
 		summaryHeader = fmt.Sprintf("%d lessons %d reviews", totalLessons, totalReviews)
 	}
 
@@ -124,10 +130,32 @@ func (m model) indexView() string {
 
 // Render assignments view
 func (m model) assignmentsView() string {
-	if len(m.response) == 0 {
+	if m.Assignments == nil {
 		return fmt.Sprintf("loading...")
 	}
-	return fmt.Sprintf("%s", string(m.response))
+	var b strings.Builder
+	b.WriteString("  Assignments:\n")
+	tally := map[string]int{}
+	for _, assignment := range m.Assignments {
+		var classification string
+		switch stage := assignment.Data.SRSStage; {
+		case stage < 5:
+			classification = "apprentice"
+		case stage < 7:
+			classification = "guru"
+		case stage < 8:
+			classification = "master"
+		case stage < 9:
+			classification = "enlightened"
+		}
+		tally[classification] += 1
+	}
+	b.WriteString(fmt.Sprintf("Apprentice:  %d\n", tally["apprentice"]))
+	b.WriteString(fmt.Sprintf("Guru:        %d\n", tally["guru"]))
+	b.WriteString(fmt.Sprintf("Master:      %d\n", tally["master"]))
+	b.WriteString(fmt.Sprintf("Enlightened: %d\n", tally["enlightened"]))
+
+	return b.String() + "\n"
 }
 
 // Render summary view
@@ -166,6 +194,9 @@ func (m model) summaryView() string {
 	// Render reviews
 	b.WriteString("  Reviews:")
 	for i, review := range m.SummaryReviews {
+		if i == 0 {
+			continue
+		}
 		if m.cursors[SummaryView] == i+len(m.SummaryLessons) {
 			cursor := ui.Keyword(">")
 			b.WriteString(fmt.Sprintf("\n  %s ", cursor))
@@ -186,6 +217,20 @@ func (m model) summaryView() string {
 				b.WriteString(fmt.Sprintf("+%d more", missingCount))
 			}
 		}
+	}
+
+	return b.String() + "\n"
+}
+
+// Render reviews view
+func (m model) reviewsView() string {
+	if m.Reviews == nil {
+		return "loading..."
+	}
+	var b strings.Builder
+	b.WriteString("  Reviews:")
+	for i, review := range m.Reviews.Data {
+		b.WriteString(fmt.Sprintf("%d: %d\n", i, review.Data.SubjectID))
 	}
 
 	return b.String() + "\n"

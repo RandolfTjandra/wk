@@ -3,7 +3,7 @@ module wk
 go 1.20
 
 require (
-	github.com/brandur/wanikaniapi v0.3.0
+	github.com/brandur/wanikaniapi v0.4.0
 	github.com/charmbracelet/bubbletea v0.23.1
 	github.com/charmbracelet/lipgloss v0.6.0
 	github.com/lucasb-eyer/go-colorful v1.2.0
