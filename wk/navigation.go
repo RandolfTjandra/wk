@@ -33,6 +33,10 @@ func (m model) handleIndexKeyPress(key tea.KeyMsg) (tea.Model, tea.Cmd) {
 		switch m.currentPage {
 		case SummaryView:
 			return m, m.commander.GetSummary
+		case ReviewsView:
+			return m, m.commander.GetReviews
+		case AssignmentsView:
+			return m, m.commander.GetAssignments
 		}
 	}
 	return m, nil

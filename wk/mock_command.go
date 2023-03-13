@@ -187,6 +187,50 @@ func (c mockCommander) GetReviews() tea.Msg {
 	}
 }
 
+func (c mockCommander) GetAssignments() tea.Msg {
+	example := []byte(`{
+  "object": "collection",
+  "url": "https://api.wanikani.com/v2/assignments",
+  "pages": {
+    "per_page": 500,
+    "next_url": "https://api.wanikani.com/v2/assignments?page_after_id=80469434",
+    "previous_url": null
+  },
+  "total_count": 1600,
+  "data_updated_at": "2017-11-29T19:37:03.571377Z",
+  "data": [
+    {
+      "id": 80463006,
+      "object": "assignment",
+      "url": "https://api.wanikani.com/v2/assignments/80463006",
+      "data_updated_at": "2017-10-30T01:51:10.438432Z",
+      "data": {
+        "created_at": "2017-09-05T23:38:10.695133Z",
+        "subject_id": 8761,
+        "subject_type": "radical",
+        "srs_stage": 8,
+        "unlocked_at": "2017-09-05T23:38:10.695133Z",
+        "started_at": "2017-09-05T23:41:28.980679Z",
+        "passed_at": "2017-09-07T17:14:14.491889Z",
+        "burned_at": null,
+        "available_at": "2018-02-27T00:00:00.000000Z",
+        "resurrected_at": null
+      }
+    }
+  ]
+}`)
+	resource := wanikaniapi.AssignmentPage{}
+	err := json.Unmarshal(example, &resource)
+
+	return func() tea.Msg {
+		if err == nil {
+			return &resource
+		} else {
+			return errMsg{err}
+		}
+	}
+}
+
 func (c mockCommander) GetVoiceActors() tea.Msg {
 	example := []byte(`{
   "object": "collection",

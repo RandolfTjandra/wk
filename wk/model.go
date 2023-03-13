@@ -22,12 +22,15 @@ type model struct {
 	Summary        *wanikaniapi.Summary
 	SummaryLessons []*wanikaniapi.SummaryLesson
 	SummaryReviews []*wanikaniapi.SummaryReview
-
 	// The following maps represent SummaryLessons and SummaryReviews stacked on
 	// top of each other. This is so that navigation can be managed by a single
 	// slice
 	SummaryExpansion map[int]bool
 	SummarySubjects  map[int][]*wanikaniapi.Subject
+
+	Reviews *wanikaniapi.ReviewPage
+
+	Assignments []*wanikaniapi.Assignment
 }
 
 func (m model) Init() tea.Cmd {
@@ -41,8 +44,8 @@ func initialModel(commander Commander, view PageView, subjectRepo db.SubjectRepo
 		navChoices: []PageView{
 			SummaryView,
 			LessonsView,
-			AssignmentsView,
 			ReviewsView,
+			AssignmentsView,
 			SettingsView,
 			AccountView,
 		},
@@ -95,6 +98,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			m.SummaryReviews = append(m.SummaryReviews, review)
 		}
+	case *wanikaniapi.ReviewPage:
+		m.Reviews = msg
+	case []*wanikaniapi.Assignment:
+		m.Assignments = msg
 	case []*wanikaniapi.Subject:
 		m.SummarySubjects[m.cursors[SummaryView]] = msg
 	}

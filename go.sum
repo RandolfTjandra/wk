@@ -2,6 +2,8 @@ github.com/aymanbagabas/go-osc52 v1.0.3 h1:DTwqENW7X9arYimJrPeGZcV0ln14sGMt3pHZs
 github.com/aymanbagabas/go-osc52 v1.0.3/go.mod h1:zT8H+Rk4VSabYN90pWyugflM3ZhpTZNC7cASDfUCdT4=
 github.com/brandur/wanikaniapi v0.3.0 h1:TzXMwYpN9BMOMV5zdxNmssR7GM3GXLtVgZAZXOXOX8Q=
 github.com/brandur/wanikaniapi v0.3.0/go.mod h1:J7Bi3imwP1jid2d/sgEI/UYrCLqxs/4NhdutN0ogIdY=
+github.com/brandur/wanikaniapi v0.4.0 h1:T4XCSvvq1jykUFkKMj56cJ4qsFs8D+iVYfY1rjgdNrk=
+github.com/brandur/wanikaniapi v0.4.0/go.mod h1:J7Bi3imwP1jid2d/sgEI/UYrCLqxs/4NhdutN0ogIdY=
 github.com/bsm/ginkgo/v2 v2.5.0 h1:aOAnND1T40wEdAtkGSkvSICWeQ8L3UASX7YVCqQx+eQ=
 github.com/bsm/gomega v1.20.0 h1:JhAwLmtRzXFTx2AkALSLa8ijZafntmhSoU63Ok18Uq8=
 github.com/cespare/xxhash/v2 v2.2.0 h1:DC2CZ1Ep5Y4k3ZQ899DldepgrayRUGE6BBZ/cd9Cj44=

@@ -19,7 +19,7 @@ func GetSummary(ctx context.Context, wkClient *wanikaniapi.Client) (*wanikaniapi
 	if err != nil { // get from api
 		res, err := wkClient.SummaryGet(&wanikaniapi.SummaryGetParams{})
 		marshalled, _ := json.Marshal(res)
-		rdb.Set(ctx, "summary", marshalled, 24*time.Hour)
+		rdb.Set(ctx, "summary", marshalled, 1*time.Hour)
 		return res, err
 	}
 	resource := wanikaniapi.Summary{}
