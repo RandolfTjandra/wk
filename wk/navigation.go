@@ -34,7 +34,11 @@ func (m model) handleIndexKeyPress(key tea.KeyMsg) (tea.Model, tea.Cmd) {
 		case SummaryView:
 			return m, m.commander.GetSummary
 		case ReviewsView:
-			return m, m.commander.GetReviews
+			assignmentIDs := []wanikaniapi.WKID{}
+			for _, assignment := range m.Assignments {
+				assignmentIDs = append(assignmentIDs, assignment.ID)
+			}
+			return m, m.commander.GetReviews(assignmentIDs...)
 		case AssignmentsView:
 			return m, m.commander.GetAssignments
 		}

@@ -145,7 +145,8 @@ func (c mockCommander) GetSubjects(subjectIDs []wanikaniapi.WKID) func() tea.Msg
 	}
 }
 
-func (c mockCommander) GetReviews() tea.Msg {
+// should return reviews not a page
+func (c mockCommander) GetReviews(assignmentIDs ...wanikaniapi.WKID) func() tea.Msg {
 	example := []byte(`{
   "object": "collection",
   "url": "https://api.wanikani.com/v2/reviews",
