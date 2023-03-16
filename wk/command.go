@@ -24,7 +24,7 @@ type Commander interface {
 	GetUser() tea.Msg
 	GetSummary() tea.Msg
 	GetSubjects(subjectIDs []wanikaniapi.WKID) func() tea.Msg
-	GetReviews() tea.Msg
+	GetReviews(reviewIDs ...wanikaniapi.WKID) func() tea.Msg
 	GetAssignments() tea.Msg
 	GetVoiceActors() tea.Msg
 }
@@ -55,12 +55,14 @@ func (c commander) GetUser() tea.Msg {
 }
 
 // return *wanikaniapi.ReviewPage
-func (c commander) GetReviews() tea.Msg {
-	reviews, err := wanikani.GetReviews(context.Background(), c.wanikaniClient)
-	if err != nil {
-		return errMsg{err}
+func (c commander) GetReviews(reviewIDs ...wanikaniapi.WKID) func() tea.Msg {
+	return func() tea.Msg {
+		reviews, err := wanikani.GetReviews(context.Background(), c.wanikaniClient, reviewIDs...)
+		if err != nil {
+			return errMsg{err}
+		}
+		return reviews
 	}
-	return reviews
 }
 
 // return *wanikaniapi.Summary

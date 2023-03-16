@@ -35,6 +35,12 @@ var (
 	Kanji   = makeFgBgStyle("#E5E5E5", "#FF00AA")
 	Vocab   = makeFgBgStyle("#E5E5E5", "#9400FF")
 
+	Apprentice  = makeFgStyle("#FF00AA")
+	Guru        = makeFgStyle("#9400FF")
+	Master      = makeFgStyle("#294DDB")
+	Enlightened = makeFgStyle("#00AAFF")
+	Burned      = makeFgStyle("#434343")
+
 	highlight = lipgloss.AdaptiveColor{Light: "#874BFD", Dark: "#7D56F4"}
 	special   = lipgloss.AdaptiveColor{Light: "#43BF6D", Dark: "#73F59F"}
 	warn      = lipgloss.AdaptiveColor{Light: "#BD3762", Dark: "#E04376"}

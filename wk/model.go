@@ -28,13 +28,19 @@ type model struct {
 	SummaryExpansion map[int]bool
 	SummarySubjects  map[int][]*wanikaniapi.Subject
 
-	Reviews *wanikaniapi.ReviewPage
+	CurrentReviews *wanikaniapi.SummaryReview
+	Reviews        *wanikaniapi.ReviewPage
 
 	Assignments []*wanikaniapi.Assignment
 }
 
 func (m model) Init() tea.Cmd {
-	return tea.Batch(m.commander.GetUser, tea.EnterAltScreen, m.commander.GetSummary)
+	return tea.Batch(
+		tea.EnterAltScreen,
+		m.commander.GetUser,
+		m.commander.GetSummary,
+		m.commander.GetAssignments,
+	)
 }
 
 func initialModel(commander Commander, view PageView, subjectRepo db.SubjectRepo) model {
@@ -63,7 +69,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case errMsg:
 		m.err = msg
-		return m, tea.Quit
+		return m, nil
 
 	// key press
 	case tea.KeyMsg:
@@ -98,6 +104,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			m.SummaryReviews = append(m.SummaryReviews, review)
 		}
+		m.CurrentReviews = m.SummaryReviews[0]
+		m.SummaryReviews = m.SummaryReviews[1:]
+
 	case *wanikaniapi.ReviewPage:
 		m.Reviews = msg
 	case []*wanikaniapi.Assignment:
