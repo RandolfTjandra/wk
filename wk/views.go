@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"strings"
 
-	"wk/pkg/ui"
-
 	"github.com/brandur/wanikaniapi"
+	"github.com/charmbracelet/lipgloss"
+
+	"wk/pkg/ui"
 )
 
 // Views
@@ -33,7 +34,9 @@ func (m model) View() string {
 	var b strings.Builder
 	switch m.currentPage {
 	case IndexView:
-		m.content = ""
+		m.content = lipgloss.NewStyle().
+			Height(5).
+			Render("Make selection from side menu")
 	case SummaryView:
 		m.content = m.summaryView()
 	case ReviewsView:
@@ -42,6 +45,8 @@ func (m model) View() string {
 		m.content = m.assignmentsView()
 	case AccountView:
 		m.content = m.accountView()
+	case LevelsView:
+		m.content = m.levelsView()
 	default:
 		m.content = "incomplete: work in progress"
 	}
