@@ -269,3 +269,33 @@ func (c mockCommander) GetVoiceActors() tea.Msg {
 		}
 	}
 }
+
+func (c mockCommander) GetLevelProgressions() tea.Msg {
+	example := []byte(`[
+    {
+      "id": 49392,
+      "object": "level_progression",
+      "url": "https://api.wanikani.com/v2/level_progressions/49392",
+      "data_updated_at": "2017-03-30T11:31:20.438432Z",
+      "data": {
+        "created_at": "2017-03-30T08:21:51.439918Z",
+        "level": 42,
+        "unlocked_at": "2017-03-30T08:21:51.439918Z",
+        "started_at": "2017-03-30T11:31:20.438432Z",
+        "passed_at": null,
+        "completed_at": null,
+        "abandoned_at": null
+      }
+    }
+  ]`)
+	resource := []*wanikaniapi.LevelProgression{}
+	err := json.Unmarshal(example, &resource)
+
+	return func() tea.Msg {
+		if err == nil {
+			return &resource
+		} else {
+			return errMsg{err}
+		}
+	}
+}

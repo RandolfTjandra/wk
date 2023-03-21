@@ -32,6 +32,8 @@ type model struct {
 	Reviews        *wanikaniapi.ReviewPage
 
 	Assignments []*wanikaniapi.Assignment
+
+	Levels []*wanikaniapi.LevelProgression
 }
 
 func (m model) Init() tea.Cmd {
@@ -53,6 +55,7 @@ func initialModel(commander Commander, view PageView, subjectRepo db.SubjectRepo
 			ReviewsView,
 			AssignmentsView,
 			SettingsView,
+			LevelsView,
 			AccountView,
 		},
 		cursors: map[PageView]int{
@@ -113,6 +116,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.Assignments = msg
 	case []*wanikaniapi.Subject:
 		m.SummarySubjects[m.cursors[SummaryView]] = msg
+	case []*wanikaniapi.LevelProgression:
+		m.Levels = msg
 	}
 
 	return m, nil

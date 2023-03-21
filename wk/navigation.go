@@ -41,6 +41,8 @@ func (m model) handleIndexKeyPress(key tea.KeyMsg) (tea.Model, tea.Cmd) {
 			return m, m.commander.GetReviews(assignmentIDs...)
 		case AssignmentsView:
 			return m, m.commander.GetAssignments
+		case LevelsView:
+			return m, m.commander.GetLevelProgressions
 		}
 	}
 	return m, nil

@@ -27,6 +27,7 @@ type Commander interface {
 	GetReviews(reviewIDs ...wanikaniapi.WKID) func() tea.Msg
 	GetAssignments() tea.Msg
 	GetVoiceActors() tea.Msg
+	GetLevelProgressions() tea.Msg
 }
 
 type commander struct {
@@ -113,4 +114,14 @@ func (c commander) GetSubjects(subjectIDs []wanikaniapi.WKID) func() tea.Msg {
 // return *wanikaniapi.VoiceActorPage
 func (c commander) GetVoiceActors() tea.Msg {
 	return nil
+}
+
+// return []*wanikaniapi.GetLevelProgression
+func (c commander) GetLevelProgressions() tea.Msg {
+	progressions, err := wanikani.GetLevelProgressions(context.Background(), c.wanikaniClient)
+	if err != nil {
+		return errMsg{err}
+	}
+
+	return progressions
 }

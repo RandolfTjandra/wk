@@ -15,7 +15,7 @@ import (
 // Render index view
 func (m model) indexView() string {
 	var b strings.Builder
-	b.WriteString(ui.H1Title.Render("Wk"))
+	b.WriteString(ui.H1Title.Render("~Wk~"))
 	b.WriteString("\n")
 
 	// Summary header
