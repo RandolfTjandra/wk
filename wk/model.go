@@ -2,12 +2,16 @@ package main
 
 import (
 	"github.com/brandur/wanikaniapi"
+	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 
 	"wk/pkg/db"
 )
 
 type model struct {
+	spinner spinner.Model
+
 	commander Commander
 
 	navChoices  []PageView
@@ -42,11 +46,16 @@ func (m model) Init() tea.Cmd {
 		m.commander.GetUser,
 		m.commander.GetSummary,
 		m.commander.GetAssignments,
+		m.spinner.Tick,
 	)
 }
 
 func initialModel(commander Commander, view PageView, subjectRepo db.SubjectRepo) model {
+	s := spinner.New()
+	s.Spinner = spinner.MiniDot
+	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
 	return model{
+		spinner:     s,
 		commander:   commander,
 		currentPage: view,
 		navChoices: []PageView{
@@ -87,7 +96,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case *wanikaniapi.User:
 		m.User = msg
-		return m, nil
+		return m, m.spinner.Tick
 
 	case *wanikaniapi.Summary:
 		m.Summary = msg
@@ -118,6 +127,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.SummarySubjects[m.cursors[SummaryView]] = msg
 	case []*wanikaniapi.LevelProgression:
 		m.Levels = msg
+	default:
+		var cmd tea.Cmd
+		m.spinner, cmd = m.spinner.Update(msg)
+		return m, cmd
 	}
 
 	return m, nil
