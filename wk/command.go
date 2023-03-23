@@ -88,25 +88,25 @@ func (c commander) GetAssignments() tea.Msg {
 
 // return []*wanikaniapi.Subject
 func (c commander) GetSubjects(subjectIDs []wanikaniapi.WKID) func() tea.Msg {
-	subjectCount := 0
-	subjects := []*wanikaniapi.Subject{}
-	for _, subjectID := range subjectIDs {
-		if subjectCount == 100 { // cap to avoid rate limiting
-			break
-		}
-		subject, err := wanikani.GetSubject(context.Background(), c.subjectRepo, *c.wanikaniClient, subjectID)
-		if err != nil {
-			log.Print("\n  skipped due to error: " + err.Error() + "\n")
-			continue
-		}
-		if subject.KanjiData != nil ||
-			subject.VocabularyData != nil ||
-			(subject.RadicalData != nil && subject.RadicalData.Characters != nil) {
-			subjects = append(subjects, subject)
-			subjectCount++
-		}
-	}
 	return func() tea.Msg {
+		subjectCount := 0
+		subjects := []*wanikaniapi.Subject{}
+		for _, subjectID := range subjectIDs {
+			if subjectCount == 100 { // cap to avoid rate limiting
+				break
+			}
+			subject, err := wanikani.GetSubject(context.Background(), c.subjectRepo, *c.wanikaniClient, subjectID)
+			if err != nil {
+				log.Print("\n  skipped due to error: " + err.Error() + "\n")
+				continue
+			}
+			if subject.KanjiData != nil ||
+				subject.VocabularyData != nil ||
+				(subject.RadicalData != nil && subject.RadicalData.Characters != nil) {
+				subjects = append(subjects, subject)
+				subjectCount++
+			}
+		}
 		return subjects
 	}
 }

@@ -92,7 +92,6 @@ func (m model) renderNavigation() string {
 		BorderForeground(lipgloss.Color("87")).
 		MarginLeft(ui.UIXMargin).Padding(0, 2, 0, 1).
 		Render(choices.String())
-
 }
 
 // Render summary which contains remaining lessons and reviews

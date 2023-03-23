@@ -15,6 +15,7 @@ require (
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d // indirect
 	github.com/aymanbagabas/go-osc52 v1.0.3 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
+	github.com/charmbracelet/bubbles v0.15.0 // indirect
 	github.com/containerd/console v1.0.3 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect

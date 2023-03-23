@@ -30,12 +30,16 @@ func (m model) summaryView() string {
 			lesson.AvailableAt.Local().Format(time.TimeOnly),
 		))
 		if m.SummaryExpansion[i] {
-			b.WriteString("\n  " + m.renderSubjects(m.SummarySubjects[i]))
-			renderedCount := len(m.SummarySubjects[i])
-			count := len(m.SummaryLessons[i].SubjectIDs)
-			missingCount := count - renderedCount
-			if missingCount > 0 {
-				b.WriteString(fmt.Sprintf("+%d more", missingCount))
+			if len(m.SummarySubjects[i]) == 0 {
+				b.WriteString(" " + m.spinner.View())
+			} else {
+				b.WriteString("\n  " + m.renderSubjects(m.SummarySubjects[i]))
+				renderedCount := len(m.SummarySubjects[i])
+				count := len(m.SummaryLessons[i].SubjectIDs)
+				missingCount := count - renderedCount
+				if missingCount > 0 {
+					b.WriteString(fmt.Sprintf("+%d more", missingCount))
+				}
 			}
 		}
 	}
@@ -57,12 +61,16 @@ func (m model) summaryView() string {
 			review.AvailableAt.Local().Format(time.TimeOnly),
 		))
 		if m.SummaryExpansion[i+len(m.SummaryLessons)] {
-			b.WriteString("\n  " + m.renderSubjects(m.SummarySubjects[i+len(m.SummaryLessons)]))
-			renderedCount := len(m.SummarySubjects[i+len(m.SummaryLessons)])
-			count := len(m.SummaryReviews[i].SubjectIDs)
-			missingCount := count - renderedCount
-			if missingCount > 0 {
-				b.WriteString(fmt.Sprintf("+%d more", missingCount))
+			if len(m.SummarySubjects[i+len(m.SummaryLessons)]) == 0 {
+				b.WriteString(" " + m.spinner.View())
+			} else {
+				b.WriteString("\n  " + m.renderSubjects(m.SummarySubjects[i+len(m.SummaryLessons)]))
+				renderedCount := len(m.SummarySubjects[i+len(m.SummaryLessons)])
+				count := len(m.SummaryReviews[i].SubjectIDs)
+				missingCount := count - renderedCount
+				if missingCount > 0 {
+					b.WriteString(fmt.Sprintf("+%d more", missingCount))
+				}
 			}
 		}
 	}
