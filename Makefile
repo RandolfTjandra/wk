@@ -12,7 +12,6 @@ build-wk:
 			 ./wk/navigation.go \
 			 ./wk/views.go \
 			 ./wk/index_view.go \
-			 ./wk/summary_view.go \
 			 ./wk/assignments_view.go \
 			 ./wk/reviews_view.go \
 			 ./wk/account_view.go \

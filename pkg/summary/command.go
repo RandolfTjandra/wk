@@ -1,4 +1,4 @@
-package main
+package summary
 
 import (
 	"context"
@@ -21,13 +21,8 @@ type wkRes struct {
 }
 
 type Commander interface {
-	GetUser() tea.Msg
 	GetSummary() tea.Msg
-	GetSubjects(subjectIDs []wanikaniapi.WKID) func() tea.Msg
-	GetReviews(reviewIDs ...wanikaniapi.WKID) func() tea.Msg
-	GetAssignments() tea.Msg
-	GetVoiceActors() tea.Msg
-	GetLevelProgressions() tea.Msg
+	GetSubjects(cursor int, subjectIDs []wanikaniapi.WKID) func() tea.Msg
 }
 
 type commander struct {
@@ -41,29 +36,8 @@ func NewCommander(live bool, subjectRepo db.SubjectRepo, wanikaniClient *wanikan
 			subjectRepo:    subjectRepo,
 			wanikaniClient: wanikaniClient,
 		}
-	} else {
-		return mockCommander{}
 	}
-}
-
-// return *wanikaniapi.User
-func (c *commander) GetUser() tea.Msg {
-	user, err := wanikani.GetUser(context.Background(), c.wanikaniClient)
-	if err != nil {
-		return errMsg{err}
-	}
-	return user
-}
-
-// return *wanikaniapi.ReviewPage
-func (c *commander) GetReviews(reviewIDs ...wanikaniapi.WKID) func() tea.Msg {
-	return func() tea.Msg {
-		reviews, err := wanikani.GetReviews(context.Background(), c.wanikaniClient, reviewIDs...)
-		if err != nil {
-			return errMsg{err}
-		}
-		return reviews
-	}
+	return nil
 }
 
 // return *wanikaniapi.Summary
@@ -76,18 +50,13 @@ func (c *commander) GetSummary() tea.Msg {
 	return summary
 }
 
-// return []*wanikaniapi.Assignment
-func (c *commander) GetAssignments() tea.Msg {
-	assignments, err := wanikani.GetAssignments(context.Background(), c.wanikaniClient)
-	if err != nil {
-		return errMsg{err}
-	}
-
-	return assignments
+type SummaryExpansion struct {
+	cursor   int
+	subjects []*wanikaniapi.Subject
 }
 
 // return []*wanikaniapi.Subject
-func (c *commander) GetSubjects(subjectIDs []wanikaniapi.WKID) func() tea.Msg {
+func (c *commander) GetSubjects(cursor int, subjectIDs []wanikaniapi.WKID) func() tea.Msg {
 	return func() tea.Msg {
 		subjectCount := 0
 		subjects := []*wanikaniapi.Subject{}
@@ -107,21 +76,10 @@ func (c *commander) GetSubjects(subjectIDs []wanikaniapi.WKID) func() tea.Msg {
 				subjectCount++
 			}
 		}
-		return subjects
+
+		return SummaryExpansion{
+			cursor:   cursor,
+			subjects: subjects,
+		}
 	}
-}
-
-// return *wanikaniapi.VoiceActorPage
-func (c *commander) GetVoiceActors() tea.Msg {
-	return nil
-}
-
-// return []*wanikaniapi.GetLevelProgression
-func (c *commander) GetLevelProgressions() tea.Msg {
-	progressions, err := wanikani.GetLevelProgressions(context.Background(), c.wanikaniClient)
-	if err != nil {
-		return errMsg{err}
-	}
-
-	return progressions
 }

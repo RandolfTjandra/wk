@@ -6,7 +6,7 @@ import (
 )
 
 // Render reviews view
-func (m model) reviewsView() string {
+func (m mainModel) reviewsView() string {
 	if m.Reviews == nil {
 		return "loading..."
 	}

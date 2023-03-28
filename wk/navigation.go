@@ -5,7 +5,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func (m model) handleIndexKeyPress(key tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m mainModel) handleIndexKeyPress(key tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch key.String() {
 	case "esc":
 		m.currentPage = IndexView
@@ -20,10 +20,6 @@ func (m model) handleIndexKeyPress(key tea.KeyMsg) (tea.Model, tea.Cmd) {
 		switch m.currentPage {
 		case IndexView:
 			if m.cursors[m.currentPage] < len(m.navChoices)-1 {
-				m.cursors[m.currentPage]++
-			}
-		case SummaryView:
-			if m.cursors[m.currentPage] < len(m.SummaryReviews)+len(m.SummaryLessons)-1 {
 				m.cursors[m.currentPage]++
 			}
 		}
@@ -48,7 +44,7 @@ func (m model) handleIndexKeyPress(key tea.KeyMsg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m model) handleSummaryKeyPress(key tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m mainModel) handleDefaultKeyPress(key tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch key.String() {
 	case "esc":
 		m.currentPage = IndexView
@@ -63,49 +59,6 @@ func (m model) handleSummaryKeyPress(key tea.KeyMsg) (tea.Model, tea.Cmd) {
 		switch m.currentPage {
 		case IndexView:
 			if m.cursors[m.currentPage] < len(m.navChoices)-1 {
-				m.cursors[m.currentPage]++
-			}
-		case SummaryView:
-			if m.cursors[m.currentPage] < len(m.SummaryReviews)+len(m.SummaryLessons)-1 {
-				m.cursors[m.currentPage]++
-			}
-		}
-	case "enter":
-		m.SummaryExpansion[m.cursors[SummaryView]] = !m.SummaryExpansion[m.cursors[SummaryView]]
-		if m.SummaryExpansion[m.cursors[SummaryView]] {
-			cursor := m.cursors[SummaryView]
-			var subjectIDs []wanikaniapi.WKID
-			if cursor < len(m.SummaryLessons) {
-				subjectIDs = m.SummaryLessons[cursor].SubjectIDs
-			} else {
-				cursor = cursor - len(m.SummaryLessons)
-				subjectIDs = m.SummaryReviews[cursor].SubjectIDs
-			}
-			return m, m.commander.GetSubjects(subjectIDs)
-		}
-	}
-	return m, nil
-}
-
-func (m model) handleDefaultKeyPress(key tea.KeyMsg) (tea.Model, tea.Cmd) {
-	switch key.String() {
-	case "esc":
-		m.currentPage = IndexView
-		return m, nil
-	case "q":
-		return m, tea.Quit
-	case "up", "k":
-		if m.cursors[m.currentPage] > 0 {
-			m.cursors[m.currentPage]--
-		}
-	case "down", "j":
-		switch m.currentPage {
-		case IndexView:
-			if m.cursors[m.currentPage] < len(m.navChoices)-1 {
-				m.cursors[m.currentPage]++
-			}
-		case SummaryView:
-			if m.cursors[m.currentPage] < len(m.SummaryReviews)+len(m.SummaryLessons)-1 {
 				m.cursors[m.currentPage]++
 			}
 		}

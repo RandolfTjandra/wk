@@ -9,7 +9,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-func (m model) accountView() string {
+func (m mainModel) accountView() string {
 	var b strings.Builder
 	activeStatus := ui.BatsuMark
 	if m.User.Data.Subscription.Active {
