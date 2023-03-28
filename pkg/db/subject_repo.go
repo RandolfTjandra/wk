@@ -27,8 +27,8 @@ func (r *subjectRepo) Insert(subjectID int, subject string) (err error) {
 	return
 }
 
-func NewSubjectRepo(db *sql.DB) SubjectRepo {
-	return &subjectRepo{
+func InitSubjectRepo(db *sql.DB) {
+	SubjectR = &subjectRepo{
 		db: db,
 	}
 }

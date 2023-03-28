@@ -1,6 +1,7 @@
 package levels
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/brandur/wanikaniapi"
@@ -57,7 +58,16 @@ func (m *model) View() string {
 		return "loading..." + m.spinner.View()
 	}
 	var b strings.Builder
-	b.WriteString("\n\n")
+	for _, level := range m.Levels {
+		var passedString string
+		pass := level.Data.PassedAt
+		if pass != nil {
+			passedString = pass.String()
+		} else {
+			passedString = "in progress"
+		}
+		b.WriteString(fmt.Sprintf("%d: %s\n", level.Data.Level, passedString))
+	}
 
 	return b.String() + "\n"
 }

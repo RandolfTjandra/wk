@@ -7,7 +7,6 @@ import (
 	"github.com/brandur/wanikaniapi"
 	tea "github.com/charmbracelet/bubbletea"
 
-	"wk/pkg/db"
 	"wk/pkg/wanikani"
 )
 
@@ -20,29 +19,9 @@ type wkRes struct {
 	resBody    int
 }
 
-type Commander interface {
-	GetSummary() tea.Msg
-	GetSubjects(cursor int, subjectIDs []wanikaniapi.WKID) func() tea.Msg
-}
-
-type commander struct {
-	subjectRepo    db.SubjectRepo
-	wanikaniClient *wanikaniapi.Client
-}
-
-func NewCommander(live bool, subjectRepo db.SubjectRepo, wanikaniClient *wanikaniapi.Client) Commander {
-	if live {
-		return &commander{
-			subjectRepo:    subjectRepo,
-			wanikaniClient: wanikaniClient,
-		}
-	}
-	return nil
-}
-
 // return *wanikaniapi.Summary
-func (c *commander) GetSummary() tea.Msg {
-	summary, err := wanikani.GetSummary(context.Background(), c.wanikaniClient)
+func GetSummary() tea.Msg {
+	summary, err := wanikani.GetSummary(context.Background())
 	if err != nil {
 		return errMsg{err}
 	}
@@ -56,7 +35,7 @@ type SummaryExpansion struct {
 }
 
 // return []*wanikaniapi.Subject
-func (c *commander) GetSubjects(cursor int, subjectIDs []wanikaniapi.WKID) func() tea.Msg {
+func GetSubjects(cursor int, subjectIDs []wanikaniapi.WKID) func() tea.Msg {
 	return func() tea.Msg {
 		subjectCount := 0
 		subjects := []*wanikaniapi.Subject{}
@@ -64,7 +43,7 @@ func (c *commander) GetSubjects(cursor int, subjectIDs []wanikaniapi.WKID) func(
 			if subjectCount == 100 { // cap to avoid rate limiting
 				break
 			}
-			subject, err := wanikani.GetSubject(context.Background(), c.subjectRepo, *wanikani.Client, subjectID)
+			subject, err := wanikani.GetSubject(context.Background(), *wanikani.Client, subjectID)
 			if err != nil {
 				log.Print("\n  skipped due to error: " + err.Error() + "\n")
 				continue

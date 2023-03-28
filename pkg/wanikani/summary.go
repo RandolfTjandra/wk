@@ -9,7 +9,7 @@ import (
 	redis "github.com/redis/go-redis/v9"
 )
 
-func GetSummary(ctx context.Context, wkClient *wanikaniapi.Client) (*wanikaniapi.Summary, error) {
+func GetSummary(ctx context.Context) (*wanikaniapi.Summary, error) {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     RedisAddr,
 		Password: "", // no password set

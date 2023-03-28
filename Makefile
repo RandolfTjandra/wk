@@ -7,7 +7,7 @@ build-wk:
 	go build -o $(DIST_DIR)/wk/wk \
 			 ./wk/main.go \
 			 ./wk/model.go \
-			 ./wk/command.go \
+			 ./wk/commands.go \
 			 ./wk/mock_command.go \
 			 ./wk/navigation.go \
 			 ./wk/views.go \

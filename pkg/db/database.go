@@ -7,7 +7,8 @@ import (
 )
 
 var (
-	DB *sql.DB
+	DB       *sql.DB
+	SubjectR SubjectRepo
 )
 
 func InitDatabase() (database *sql.DB, err error) {

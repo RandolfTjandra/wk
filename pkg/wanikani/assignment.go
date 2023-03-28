@@ -18,13 +18,13 @@ const (
 )
 
 // Get assignments
-func GetAssignments(ctx context.Context, wkClient *wanikaniapi.Client) ([]*wanikaniapi.Assignment, error) {
+func GetAssignments(ctx context.Context) ([]*wanikaniapi.Assignment, error) {
 	isBurned := false
 	isStarted := true
 	isHidden := false
 
 	var assignments []*wanikaniapi.Assignment
-	err := wkClient.PageFully(func(id *wanikaniapi.WKID) (*wanikaniapi.PageObject, error) {
+	err := Client.PageFully(func(id *wanikaniapi.WKID) (*wanikaniapi.PageObject, error) {
 		listParams := wanikaniapi.AssignmentListParams{
 			Burned:  &isBurned,
 			Started: &isStarted,
@@ -33,7 +33,7 @@ func GetAssignments(ctx context.Context, wkClient *wanikaniapi.Client) ([]*wanik
 				PageAfterID: id,
 			},
 		}
-		page, err := wkClient.AssignmentList(&listParams)
+		page, err := Client.AssignmentList(&listParams)
 		if err != nil {
 			return nil, err
 		}

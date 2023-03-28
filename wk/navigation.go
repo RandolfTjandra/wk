@@ -1,7 +1,8 @@
 package main
 
 import (
-	"github.com/brandur/wanikaniapi"
+	"wk/pkg/levels"
+
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -27,16 +28,16 @@ func (m mainModel) handleIndexKeyPress(key tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.currentPage = m.navChoices[m.cursors[IndexView]]
 		// Set up what has to happen when a new page is selected
 		switch m.currentPage {
-		case ReviewsView:
-			assignmentIDs := []wanikaniapi.WKID{}
-			for _, assignment := range m.Assignments {
-				assignmentIDs = append(assignmentIDs, assignment.ID)
-			}
-			return m, m.commander.GetReviews(assignmentIDs...)
-		case AssignmentsView:
-			return m, m.commander.GetAssignments
+		// case ReviewsView:
+		// 	assignmentIDs := []wanikaniapi.WKID{}
+		// 	for _, assignment := range m.Assignments {
+		// 		assignmentIDs = append(assignmentIDs, assignment.ID)
+		// 	}
+		// 	return m, m.commander.GetReviews(assignmentIDs...)
+		// case AssignmentsView:
+		// 	return m, m.commander.GetAssignments
 		case LevelsView:
-			return m, m.commander.GetLevelProgressions
+			return m, levels.GetLevelProgressions
 		}
 	}
 	return m, nil

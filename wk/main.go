@@ -10,7 +10,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 
 	"wk/pkg/db"
-	"wk/pkg/summary"
 	"wk/pkg/wanikani"
 )
 
@@ -25,19 +24,16 @@ func main() {
 	}
 	defer database.Close()
 
-	subjectRepo := db.NewSubjectRepo(database)
+	db.InitSubjectRepo(database)
 
 	apiKey, ok := os.LookupEnv("WK_KEY")
 	if !ok {
 		fmt.Printf("no API key: %v", err)
 		os.Exit(1)
 	}
-
 	wanikani.Init(apiKey)
-	commander := NewCommander(true, subjectRepo, wanikani.Client)
-	summaryCommander := summary.NewCommander(true, subjectRepo, WKClient)
 
-	mainModel := initialMainModel(commander, summaryCommander, IndexView, subjectRepo)
+	mainModel := initialMainModel(IndexView)
 	p := tea.NewProgram(mainModel, tea.WithAltScreen())
 	if err := p.Start(); err != nil {
 		fmt.Printf("Error starting: %v", err)

@@ -10,7 +10,7 @@ import (
 
 const UserKey = "user"
 
-func GetUser(ctx context.Context, wkClient *wanikaniapi.Client) (*wanikaniapi.User, error) {
+func GetUser(ctx context.Context) (*wanikaniapi.User, error) {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     RedisAddr,
 		Password: "", // no password set
@@ -18,7 +18,7 @@ func GetUser(ctx context.Context, wkClient *wanikaniapi.Client) (*wanikaniapi.Us
 	})
 	val, err := rdb.Get(ctx, UserKey).Result()
 	if err != nil { // get from api
-		res, err := wkClient.UserGet(&wanikaniapi.UserGetParams{})
+		res, err := Client.UserGet(&wanikaniapi.UserGetParams{})
 		marshalled, _ := json.Marshal(res)
 		rdb.Set(ctx, UserKey, marshalled, 0)
 		return res, err
