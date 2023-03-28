@@ -22,7 +22,6 @@ type wkRes struct {
 
 type Commander interface {
 	GetUser() tea.Msg
-	GetSummary() tea.Msg
 	GetSubjects(subjectIDs []wanikaniapi.WKID) func() tea.Msg
 	GetReviews(reviewIDs ...wanikaniapi.WKID) func() tea.Msg
 	GetAssignments() tea.Msg
@@ -64,16 +63,6 @@ func (c *commander) GetReviews(reviewIDs ...wanikaniapi.WKID) func() tea.Msg {
 		}
 		return reviews
 	}
-}
-
-// return *wanikaniapi.Summary
-func (c *commander) GetSummary() tea.Msg {
-	summary, err := wanikani.GetSummary(context.Background(), c.wanikaniClient)
-	if err != nil {
-		return errMsg{err}
-	}
-
-	return summary
 }
 
 // return []*wanikaniapi.Assignment

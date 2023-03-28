@@ -11,6 +11,11 @@ import (
 
 	"wk/pkg/db"
 	"wk/pkg/summary"
+	"wk/pkg/wanikani"
+)
+
+var (
+	WKClient *wanikaniapi.Client
 )
 
 func main() {
@@ -28,12 +33,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	wkClient := wanikaniapi.NewClient(&wanikaniapi.ClientConfig{
-		APIToken: apiKey,
-	})
-
-	commander := NewCommander(true, subjectRepo, wkClient)
-	summaryCommander := summary.NewCommander(true, subjectRepo, wkClient)
+	wanikani.Init(apiKey)
+	commander := NewCommander(true, subjectRepo, wanikani.Client)
+	summaryCommander := summary.NewCommander(true, subjectRepo, WKClient)
 
 	mainModel := initialMainModel(commander, summaryCommander, IndexView, subjectRepo)
 	p := tea.NewProgram(mainModel, tea.WithAltScreen())

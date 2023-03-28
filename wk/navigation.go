@@ -27,8 +27,6 @@ func (m mainModel) handleIndexKeyPress(key tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.currentPage = m.navChoices[m.cursors[IndexView]]
 		// Set up what has to happen when a new page is selected
 		switch m.currentPage {
-		case SummaryView:
-			return m, m.commander.GetSummary
 		case ReviewsView:
 			assignmentIDs := []wanikaniapi.WKID{}
 			for _, assignment := range m.Assignments {

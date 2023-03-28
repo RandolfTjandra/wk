@@ -64,7 +64,7 @@ func (c *commander) GetSubjects(cursor int, subjectIDs []wanikaniapi.WKID) func(
 			if subjectCount == 100 { // cap to avoid rate limiting
 				break
 			}
-			subject, err := wanikani.GetSubject(context.Background(), c.subjectRepo, *c.wanikaniClient, subjectID)
+			subject, err := wanikani.GetSubject(context.Background(), c.subjectRepo, *wanikani.Client, subjectID)
 			if err != nil {
 				log.Print("\n  skipped due to error: " + err.Error() + "\n")
 				continue

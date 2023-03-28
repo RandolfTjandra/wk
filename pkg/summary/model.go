@@ -9,6 +9,7 @@ import (
 	"github.com/brandur/wanikaniapi"
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
 type Model interface {
@@ -36,9 +37,12 @@ type model struct {
 	SummarySubjects  map[int][]*wanikaniapi.Subject
 }
 
-func New(commander Commander, spinner spinner.Model) Model {
+func New(commander Commander) Model {
+	s := spinner.New()
+	s.Spinner = spinner.MiniDot
+	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
 	return &model{
-		spinner:          spinner,
+		spinner:          s,
 		cursor:           0,
 		commander:        commander,
 		SummaryExpansion: make(map[int]bool),
@@ -47,7 +51,7 @@ func New(commander Commander, spinner spinner.Model) Model {
 }
 
 func (m *model) Init() tea.Cmd {
-	return tea.Batch(m.commander.GetSummary)
+	return tea.Batch(m.commander.GetSummary, m.spinner.Tick)
 }
 
 func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
