@@ -6,7 +6,7 @@ import (
 )
 
 // Render assignments view
-func (m model) assignmentsView() string {
+func (m mainModel) assignmentsView() string {
 	if m.Assignments == nil {
 		return fmt.Sprintf("loading...")
 	}

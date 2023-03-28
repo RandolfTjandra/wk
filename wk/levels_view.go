@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func (m model) levelsView() string {
+func (m mainModel) levelsView() string {
 	var b strings.Builder
 	b.WriteString(fmt.Sprintf("%#v\n", m.Levels))
 	return b.String()

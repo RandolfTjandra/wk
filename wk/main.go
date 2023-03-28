@@ -10,6 +10,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 
 	"wk/pkg/db"
+	"wk/pkg/summary"
 )
 
 func main() {
@@ -32,9 +33,10 @@ func main() {
 	})
 
 	commander := NewCommander(true, subjectRepo, wkClient)
+	summaryCommander := summary.NewCommander(true, subjectRepo, wkClient)
 
-	model := initialModel(commander, IndexView, subjectRepo)
-	p := tea.NewProgram(model, tea.WithAltScreen())
+	mainModel := initialMainModel(commander, summaryCommander, IndexView, subjectRepo)
+	p := tea.NewProgram(mainModel, tea.WithAltScreen())
 	if err := p.Start(); err != nil {
 		fmt.Printf("Error starting: %v", err)
 		os.Exit(1)

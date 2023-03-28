@@ -7,9 +7,10 @@ import (
 	"github.com/charmbracelet/lipgloss"
 
 	"wk/pkg/db"
+	"wk/pkg/summary"
 )
 
-type model struct {
+type mainModel struct {
 	spinner spinner.Model
 
 	commander Commander
@@ -23,38 +24,36 @@ type model struct {
 
 	User *wanikaniapi.User
 
-	Summary        *wanikaniapi.Summary
-	SummaryLessons []*wanikaniapi.SummaryLesson
-	SummaryReviews []*wanikaniapi.SummaryReview
-	// The following maps represent SummaryLessons and SummaryReviews stacked on
-	// top of each other. This is so that navigation can be managed by a single
-	// slice
-	SummaryExpansion map[int]bool
-	SummarySubjects  map[int][]*wanikaniapi.Subject
+	summary summary.Model
 
-	CurrentReviews *wanikaniapi.SummaryReview
-	Reviews        *wanikaniapi.ReviewPage
+	Reviews *wanikaniapi.ReviewPage
 
 	Assignments []*wanikaniapi.Assignment
 
 	Levels []*wanikaniapi.LevelProgression
 }
 
-func (m model) Init() tea.Cmd {
+func (m mainModel) Init() tea.Cmd {
 	return tea.Batch(
 		tea.EnterAltScreen,
 		m.commander.GetUser,
-		m.commander.GetSummary,
 		m.commander.GetAssignments,
 		m.spinner.Tick,
+		m.summary.Init(),
 	)
 }
 
-func initialModel(commander Commander, view PageView, subjectRepo db.SubjectRepo) model {
+func initialMainModel(
+	commander Commander,
+	summaryCommander summary.Commander,
+	view PageView,
+	subjectRepo db.SubjectRepo,
+) mainModel {
 	s := spinner.New()
 	s.Spinner = spinner.MiniDot
 	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
-	return model{
+	summaryModel := summary.New(summaryCommander, s)
+	return mainModel{
 		spinner:     s,
 		commander:   commander,
 		currentPage: view,
@@ -71,13 +70,12 @@ func initialModel(commander Commander, view PageView, subjectRepo db.SubjectRepo
 			IndexView:   0,
 			SummaryView: 0,
 		},
-		SummaryExpansion: make(map[int]bool),
-		SummarySubjects:  make(map[int][]*wanikaniapi.Subject),
+		summary: summaryModel,
 	}
 }
 
-// Receives information and updates the model
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+// Receives information and updates the mainModel
+func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case errMsg:
 		m.err = msg
@@ -85,52 +83,44 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	// key press
 	case tea.KeyMsg:
+		if msg.String() == "esc" {
+			m.currentPage = IndexView
+		}
 		switch m.currentPage {
 		case IndexView:
 			return m.handleIndexKeyPress(msg)
 		case SummaryView:
-			return m.handleSummaryKeyPress(msg)
+			_, cmd := m.summary.HandleSummaryKeyPress(msg)
+			return m, cmd
 		default:
 			return m.handleDefaultKeyPress(msg)
 		}
 
 	case *wanikaniapi.User:
 		m.User = msg
-		return m, m.spinner.Tick
+		return m, nil
 
 	case *wanikaniapi.Summary:
-		m.Summary = msg
-		// Reset summary lessons
-		m.SummaryLessons = []*wanikaniapi.SummaryLesson{}
-		for _, lesson := range m.Summary.Data.Lessons {
-			if len(lesson.SubjectIDs) == 0 {
-				continue
-			}
-			m.SummaryLessons = append(m.SummaryLessons, lesson)
-		}
-		// Resest summary reviews
-		m.SummaryReviews = []*wanikaniapi.SummaryReview{}
-		for _, review := range m.Summary.Data.Reviews {
-			if len(review.SubjectIDs) == 0 {
-				continue
-			}
-			m.SummaryReviews = append(m.SummaryReviews, review)
-		}
-		m.CurrentReviews = m.SummaryReviews[0]
-		m.SummaryReviews = m.SummaryReviews[1:]
+		m.summary.Update(msg)
+	case summary.SummaryExpansion:
+		m.summary.Update(msg)
 
 	case *wanikaniapi.ReviewPage:
 		m.Reviews = msg
 	case []*wanikaniapi.Assignment:
 		m.Assignments = msg
-	case []*wanikaniapi.Subject:
-		m.SummarySubjects[m.cursors[SummaryView]] = msg
 	case []*wanikaniapi.LevelProgression:
 		m.Levels = msg
 	default:
 		var cmd tea.Cmd
+		var cmds []tea.Cmd
 		m.spinner, cmd = m.spinner.Update(msg)
-		return m, cmd
+		//update both spinners
+		cmds = append(cmds, cmd)
+		s, cmd := m.summary.Update(msg)
+		m.summary = s.(summary.Model)
+		cmds = append(cmds, cmd)
+		return m, tea.Batch(cmds...)
 	}
 
 	return m, nil

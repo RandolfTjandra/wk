@@ -13,7 +13,7 @@ import (
 )
 
 // Render index view
-func (m model) indexView() string {
+func (m mainModel) indexView() string {
 	var b strings.Builder
 	b.WriteString(ui.H1Title.Render("~Wk~"))
 	b.WriteString("\n")
@@ -70,7 +70,7 @@ func (m model) indexView() string {
 	return b.String()
 }
 
-func (m model) renderNavigation() string {
+func (m mainModel) renderNavigation() string {
 	// Render navigation
 	var choices strings.Builder
 	for i, choice := range m.navChoices {
@@ -95,22 +95,22 @@ func (m model) renderNavigation() string {
 }
 
 // Render summary which contains remaining lessons and reviews
-func (m model) renderSummaryHeader() string {
-	if m.Summary == nil {
+func (m mainModel) renderSummaryHeader() string {
+	if m.summary.GetSummary() == nil {
 		return "loading summary.."
 	} else {
 		totalLessons := 0
-		for _, lesson := range m.SummaryLessons {
+		for _, lesson := range m.summary.GetSummaryLessons() {
 			totalLessons += len(lesson.SubjectIDs)
 		}
 		// The first review contains all the reviews currently available.
 		// Subsequent reviews contain reviews that will become available in the future.
-		totalReviews := len(m.CurrentReviews.SubjectIDs)
+		totalReviews := len(m.summary.GetCurrentReviews().SubjectIDs)
 		return fmt.Sprintf("%d lessons %d reviews", totalLessons, totalReviews)
 	}
 }
 
-func (m model) renderAssignments() string {
+func (m mainModel) renderAssignments() string {
 	if len(m.Assignments) == 0 {
 		return "loading assignments\n"
 	}
