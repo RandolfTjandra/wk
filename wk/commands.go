@@ -18,16 +18,6 @@ type wkRes struct {
 	resBody    int
 }
 
-// return *wanikaniapi.User
-// TODO: should be moved to user commands when that's created
-func GetUser() tea.Msg {
-	user, err := wanikani.GetUser(context.Background())
-	if err != nil {
-		return errMsg{err}
-	}
-	return user
-}
-
 // return *wanikaniapi.ReviewPage
 func GetReviews(reviewIDs ...wanikaniapi.WKID) func() tea.Msg {
 	return func() tea.Msg {

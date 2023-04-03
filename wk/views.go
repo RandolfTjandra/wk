@@ -42,7 +42,7 @@ func (m mainModel) View() string {
 	case AssignmentsView:
 		m.content = m.assignmentsView()
 	case AccountView:
-		m.content = m.accountView()
+		m.content = m.account.View()
 	case LevelsView:
 		m.content = m.levels.View()
 	default:

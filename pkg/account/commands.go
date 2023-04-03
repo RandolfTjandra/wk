@@ -1,4 +1,4 @@
-package levels
+package account
 
 import (
 	"context"
@@ -12,12 +12,11 @@ type errMsg struct{ err error }
 
 func (e errMsg) Error() string { return e.err.Error() }
 
-// returns []*wanikaniapi.GetLevelProgression
-func GetLevelProgressions() tea.Msg {
-	progressions, err := wanikani.GetLevelProgressions(context.Background(), wanikani.Client)
+// returns *wanikaniapi.User
+func GetUser() tea.Msg {
+	user, err := wanikani.GetUser(context.Background())
 	if err != nil {
 		return errMsg{err}
 	}
-
-	return progressions
+	return user
 }

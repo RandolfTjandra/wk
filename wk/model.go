@@ -6,6 +6,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
+	"wk/pkg/account"
 	"wk/pkg/levels"
 	"wk/pkg/summary"
 )
@@ -24,6 +25,7 @@ type mainModel struct {
 
 	summary summary.Model
 	levels  levels.Model
+	account account.Model
 
 	Reviews *wanikaniapi.ReviewPage
 
@@ -35,11 +37,12 @@ type mainModel struct {
 func (m mainModel) Init() tea.Cmd {
 	return tea.Batch(
 		tea.EnterAltScreen,
-		GetUser,
+		account.GetUser,
 		GetAssignments,
 		m.spinner.Tick,
 		m.summary.Init(),
 		m.levels.Init(),
+		m.account.Init(),
 	)
 }
 
@@ -49,8 +52,6 @@ func initialMainModel(
 	s := spinner.New()
 	s.Spinner = spinner.MiniDot
 	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
-	summaryModel := summary.New()
-	levelsModel := levels.New()
 	return mainModel{
 		spinner:     s,
 		currentPage: view,
@@ -63,8 +64,9 @@ func initialMainModel(
 			IndexView:   0,
 			SummaryView: 0,
 		},
-		summary: summaryModel,
-		levels:  levelsModel,
+		summary: summary.New(),
+		levels:  levels.New(),
+		account: account.New(),
 	}
 }
 
@@ -90,10 +92,6 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m.handleDefaultKeyPress(msg)
 		}
 
-	case *wanikaniapi.User:
-		m.User = msg
-		return m, nil
-
 	case *wanikaniapi.Summary:
 		m.summary.Update(msg)
 	case summary.SummaryExpansion:
@@ -104,6 +102,8 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.Assignments = msg
 	case []*wanikaniapi.LevelProgression:
 		m.levels.Update(msg)
+	case *wanikaniapi.User:
+		m.account.Update(msg)
 	default:
 		var cmd tea.Cmd
 		var cmds []tea.Cmd

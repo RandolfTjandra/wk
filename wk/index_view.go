@@ -22,8 +22,8 @@ func (m mainModel) indexView() string {
 	summaryHeader := m.renderSummaryHeader()
 
 	// User greeting
-	if m.User != nil {
-		greeting := fmt.Sprintf("Hello %s..", m.User.Data.Username)
+	if m.account.GetUser() != nil {
+		greeting := fmt.Sprintf("Hello %s..", m.account.GetUser().Data.Username)
 		remainingWidth := ui.UIWidth - len(greeting)
 		summaryHeader = lipgloss.NewStyle().Width(remainingWidth).
 			AlignHorizontal(lipgloss.Right).
@@ -38,7 +38,7 @@ func (m mainModel) indexView() string {
 		barTitle := lipgloss.NewStyle().Render("Level Progress:")
 		bar := lipgloss.NewStyle().Width(ui.UIWidth - len(barTitle) - 2*ui.UIXMargin).
 			Align(lipgloss.Right).Render(
-			ui.Progressbar(50, float64(m.User.Data.Level), 50),
+			ui.Progressbar(50, float64(m.account.GetUser().Data.Level), 50),
 		)
 		loadingBar := lipgloss.JoinHorizontal(0, barTitle, bar)
 
