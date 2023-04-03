@@ -12,10 +12,10 @@ import (
 
 // Return a single subject saved to db
 func GetSubject(ctx context.Context,
-	subjectRepo db.SubjectRepo,
 	wkClient wanikaniapi.Client,
 	subjectID wanikaniapi.WKID,
 ) (*wanikaniapi.Subject, error) {
+	subjectRepo := db.SubjectR
 	subjectRaw, err := subjectRepo.GetByID(ctx, int(subjectID))
 	if err != nil { // get from api
 		res, err := wkClient.SubjectGet(&wanikaniapi.SubjectGetParams{ID: &subjectID})

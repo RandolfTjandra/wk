@@ -9,6 +9,7 @@ import (
 	"github.com/brandur/wanikaniapi"
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
 type Model interface {
@@ -23,8 +24,6 @@ type model struct {
 	spinner spinner.Model
 	cursor  int
 
-	commander Commander
-
 	Summary        *wanikaniapi.Summary
 	SummaryLessons []*wanikaniapi.SummaryLesson
 	CurrentReviews *wanikaniapi.SummaryReview
@@ -36,18 +35,20 @@ type model struct {
 	SummarySubjects  map[int][]*wanikaniapi.Subject
 }
 
-func New(commander Commander, spinner spinner.Model) Model {
+func New() Model {
+	s := spinner.New()
+	s.Spinner = spinner.MiniDot
+	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
 	return &model{
-		spinner:          spinner,
+		spinner:          s,
 		cursor:           0,
-		commander:        commander,
 		SummaryExpansion: make(map[int]bool),
 		SummarySubjects:  make(map[int][]*wanikaniapi.Subject),
 	}
 }
 
 func (m *model) Init() tea.Cmd {
-	return tea.Batch(m.commander.GetSummary)
+	return tea.Batch(GetSummary, m.spinner.Tick)
 }
 
 func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -95,6 +96,10 @@ func (m *model) View() string {
 	}
 	var b strings.Builder
 	b.WriteString("  Lessons:")
+	if len(m.SummaryLessons) == 0 {
+		b.WriteString("\n    No lessons!")
+	}
+
 	for i, lesson := range m.SummaryLessons {
 		if m.cursor == i {
 			cursor := ui.Keyword(">")
@@ -125,6 +130,9 @@ func (m *model) View() string {
 
 	// Render reviews
 	b.WriteString("  Reviews:")
+	if len(m.SummaryReviews) == 0 {
+		b.WriteString("\n    No Reviews! Good job!")
+	}
 	for i, review := range m.SummaryReviews {
 		// the first review just contains current reviews
 		if m.cursor == i+len(m.SummaryLessons) {
@@ -181,7 +189,7 @@ func (m *model) HandleSummaryKeyPress(key tea.KeyMsg) (tea.Model, tea.Cmd) {
 				cursor = cursor - len(m.SummaryLessons)
 				subjectIDs = m.SummaryReviews[cursor].SubjectIDs
 			}
-			return m, m.commander.GetSubjects(cursor, subjectIDs)
+			return m, GetSubjects(cursor, subjectIDs)
 		}
 	}
 	return m, nil

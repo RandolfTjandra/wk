@@ -7,15 +7,14 @@ build-wk:
 	go build -o $(DIST_DIR)/wk/wk \
 			 ./wk/main.go \
 			 ./wk/model.go \
-			 ./wk/command.go \
+			 ./wk/commands.go \
 			 ./wk/mock_command.go \
 			 ./wk/navigation.go \
 			 ./wk/views.go \
 			 ./wk/index_view.go \
 			 ./wk/assignments_view.go \
 			 ./wk/reviews_view.go \
-			 ./wk/account_view.go \
-			 ./wk/levels_view.go
+			 ./wk/account_view.go
 
 package-wk: build-wk
 	cd $(DIST_DIR)/wk && zip wk.zip ./wk 

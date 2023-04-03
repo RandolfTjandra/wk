@@ -36,7 +36,6 @@ func (m mainModel) View() string {
 			Height(5).
 			Render("Make selection from side menu")
 	case SummaryView:
-		// m.content = m.summaryView()
 		m.content = m.summary.View()
 	case ReviewsView:
 		m.content = m.reviewsView()
@@ -45,7 +44,7 @@ func (m mainModel) View() string {
 	case AccountView:
 		m.content = m.accountView()
 	case LevelsView:
-		m.content = m.levelsView()
+		m.content = m.levels.View()
 	default:
 		m.content = "incomplete: work in progress"
 	}
