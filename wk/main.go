@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/brandur/wanikaniapi"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/log"
 	_ "github.com/mattn/go-sqlite3"
 
 	"wk/pkg/db"
@@ -18,6 +18,7 @@ var (
 )
 
 func main() {
+	log.SetLevel(log.DebugLevel)
 	database, err := db.InitDatabase()
 	if err != nil {
 		log.Fatal(err)
