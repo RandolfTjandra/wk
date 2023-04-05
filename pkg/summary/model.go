@@ -186,8 +186,8 @@ func (m *model) HandleSummaryKeyPress(key tea.KeyMsg) (tea.Model, tea.Cmd) {
 			if cursor < len(m.SummaryLessons) {
 				subjectIDs = m.SummaryLessons[cursor].SubjectIDs
 			} else {
-				cursor = cursor - len(m.SummaryLessons)
-				subjectIDs = m.SummaryReviews[cursor].SubjectIDs
+				localCursor := cursor - len(m.SummaryLessons)
+				subjectIDs = m.SummaryReviews[localCursor].SubjectIDs
 			}
 			return m, GetSubjects(cursor, subjectIDs)
 		}
