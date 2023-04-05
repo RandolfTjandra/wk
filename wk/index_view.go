@@ -112,7 +112,7 @@ func (m mainModel) renderSummaryHeader() string {
 
 func (m mainModel) renderAssignments() string {
 	if len(m.Assignments) == 0 {
-		return "loading assignments\n"
+		return m.spinner.View() + " loading assignments\n"
 	}
 	var b strings.Builder
 	assignmentsSorted := wanikani.ClassifyAssignments(m.Assignments)
