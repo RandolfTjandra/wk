@@ -38,7 +38,7 @@ func (m mainModel) indexView() string {
 		barTitle := lipgloss.NewStyle().Render("Level Progress:")
 		bar := lipgloss.NewStyle().Width(ui.UIWidth - len(barTitle) - 2*ui.UIXMargin).
 			Align(lipgloss.Right).Render(
-			ui.Progressbar(50, float64(m.account.GetUser().Data.Level), 50),
+			ui.ProgressBar(50, float64(m.account.GetUser().Data.Level), 50),
 		)
 		loadingBar := lipgloss.JoinHorizontal(0, barTitle, bar)
 

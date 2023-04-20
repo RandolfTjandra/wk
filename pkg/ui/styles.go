@@ -105,7 +105,7 @@ func makeRamp(colorA, colorB string, steps float64) (s []string) {
 	return
 }
 
-func Progressbar(width int, numerator float64, denominator float64) string {
+func ProgressBar(width int, numerator float64, denominator float64) string {
 	w := float64(width)
 	percent := numerator / denominator
 
@@ -120,4 +120,21 @@ func Progressbar(width int, numerator float64, denominator float64) string {
 	emptyCells := strings.Repeat(progressEmpty, emptySize)
 
 	return fmt.Sprintf("%s%s %.0f/%.0f", fullCells, emptyCells, numerator, denominator)
+}
+
+func LevelProgressBar(width int, numerator float64, denominator float64, days int) string {
+	w := float64(width)
+	percent := numerator / denominator
+
+	fullSize := int(math.Round(w * percent))
+	var fullCells string
+	ramp := makeRamp(progressBarLeftColor, progressBarRightColor, w)
+	for i := 0; i < fullSize; i++ {
+		fullCells += termenv.String(progressFullChar).Foreground(term.Color(ramp[i])).String()
+	}
+
+	emptySize := int(w) - fullSize
+	emptyCells := strings.Repeat(progressEmpty, emptySize)
+
+	return fmt.Sprintf("%s%s %d days", fullCells, emptyCells, days)
 }
