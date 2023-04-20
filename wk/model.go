@@ -96,6 +96,7 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.summary.Update(msg)
 	case summary.SummaryExpansion:
 		m.summary.Update(msg)
+
 	case *wanikaniapi.ReviewPage:
 		m.Reviews = msg
 	case []*wanikaniapi.Assignment:
