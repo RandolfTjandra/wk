@@ -32,7 +32,7 @@ $ make local
 Once you have built the binary, you can run the tool using the following command:
 
 ```
-wk
+$ wk
 ```
 
 This assumes /usr/local/bin is in your $PATH
